@@ -1,7 +1,7 @@
 import os
 import yaml
 
-SETTINGS_FILE = os.path.join(os.path.expanduser("~"), ".msrc.yaml")
+SETTINGS_FILE = os.path.join(os.path.expanduser("~"), ".matscholar.yaml")
 
 
 def _load_settings():
@@ -13,7 +13,7 @@ def _load_settings():
         # if present.
         d = {}
         for k, v in os.environ.items():
-            if k.startswith("MATSTRACT_"):
+            if k.startswith("MATSCHOLAR_"):
                 d[k] = v
     return d
 

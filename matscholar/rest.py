@@ -1,7 +1,7 @@
 import requests
 import json
 import warnings
-from . import SETTINGS
+from os import environ
 
 """
 This module provides classes to interface with the Matstract REST
@@ -12,7 +12,7 @@ contacting John Dagdelen at jdagdelen@berkeley.edu.
 """
 
 __author__ = "John Dagdelen"
-__credits__ = "Shyue Ping Ong, Shreyas Choliam, Anubhav Jain"
+__credits__ = "Shyue Ping Ong, Shreyas Cholia, Anubhav Jain"
 __copyright__ = "Copyright 2018, Materials Intelligence"
 __version__ = "1.0"
 __maintainer__ = "John Dagdelen"
@@ -20,7 +20,7 @@ __email__ = "jdagdelen@berkeley.edu"
 __date__ = "October 3, 2018"
 
 
-class MSRester(object):
+class Rester(object):
     """
     A class to conveniently interface with the Mastract REST interface.
     The recommended way to use MatstractRester is with the "with" context
@@ -47,20 +47,20 @@ class MSRester(object):
 
     supported_fields = ['_id', 'title', 'authors', 'year',
                         'abstract', 'doi', 'journal', 'keywords',
-                        'link', 'source', 'materials', 'properties',
-                        'applications', 'descriptors', 'phases',
-                        'characterization_methods', 'synthesis_methods']
+                        'link', 'source', 'material', 'property',
+                        'application', 'descriptor', 'phase',
+                        'characterization_method', 'synthesis_method']
 
     default_fields = ['_id', 'title', 'authors', 'year',
                       'abstract', 'doi', 'journal', 'keywords',
                       'link']
 
     def __init__(self, api_key=None,
-                 endpoint="http://0.0.0.0"):
+                 endpoint="http://0.0.0.0:8080"):
         if api_key is not None:
             self.api_key = api_key
         else:
-            self.api_key = SETTINGS.get("MATSTRACT_API_KEY", "")
+            self.api_key = environ['MATERIALS_SCHOLAR_API_KEY']
         self.preamble = endpoint
         self.session = requests.Session()
         self.session.headers = {"x-api-key": self.api_key}
@@ -82,7 +82,7 @@ class MSRester(object):
         url = self.preamble + sub_url
         try:
             if method == "POST":
-                response = self.session.post(url, data=payload, verify=True)
+                response = self.session.post(url, json=payload, verify=True)
             else:
                 response = self.session.get(url, params=payload, verify=True)
             if response.status_code in [200, 400]:
@@ -92,15 +92,15 @@ class MSRester(object):
                         warnings.warn(data["warning"])
                     return data["response"]
                 else:
-                    raise MatstractRestError(data["error"])
+                    raise MatScholarRestError(data["error"])
 
-            raise MatstractRestError("REST query returned with error status code {}"
+            raise MatScholarRestError("REST query returned with error status code {}"
                                      .format(response.status_code))
 
         except Exception as ex:
             msg = "{}. Content: {}".format(str(ex), response.content) \
                 if hasattr(response, "content") else str(ex)
-            raise MatstractRestError(msg)
+            raise MatScholarRestError(msg)
 
     def get_entries(self, ids, id_type='id', fields=()):
         """
@@ -131,7 +131,7 @@ class MSRester(object):
         else:
             method = 'POST'
             if any([field not in self.supported_fields for field in fields]):
-                raise MatstractRestError('unsupported field')
+                raise MatScholarRestError('unsupported field')
         payload = {
             'ids': ids,
             'id_type': id_type,
@@ -164,7 +164,7 @@ class MSRester(object):
         else:
             method = 'POST'
             if any([field not in self.supported_fields for field in fields]):
-                raise MatstractRestError('unsupported field')
+                raise MatScholarRestError('Unsupported field supplied. Supported fields are: {}'.format(self.supported_fields))
         payload = {
             'dois': dois,
             'fields': fields
@@ -172,13 +172,61 @@ class MSRester(object):
         return self._make_request(sub_url, payload=payload, method=method)
 
     def search(self, query, limit):
+        base_query = {
+                         "text": "",
+                         "material": {
+                             "positive": [],
+                             "negative": []
+                         },
+                         "property": {
+                             "positive": [],
+                             "negative": []
+                         },
+                         "application": {
+                             "positive": [],
+                             "negative": []
+                         },
+                         "descriptor": {
+                             "positive": [],
+                             "negative": []
+                         },
+                         "characterization": {
+                             "positive": [],
+                             "negative": []
+                         },
+                         "synthesis": {
+                             "positive": [],
+                             "negative": []
+                         },
+                         "phase": {
+                             "positive": [],
+                             "negative": []
+                         },
+                        "keywords": {
+                            "positive": [],
+                            "negative": []
+            }
+                     }
+        for key in query:
+            if key == "text":
+                base_query["text"] = query["text"]
+            elif key in self.supported_fields:
+                for item in query[key]:
+                    if item[0] == "-":
+                        base_query[key]["negative"].append(item[1::])
+                    else:
+                        base_query[key]["positive"].append(item)
+            else:
+                raise MatScholarRestError("{} is not a valid search field".format(key))
+
+        query = base_query
+
         sub_url = '/search'
-        method = 'POST'
         payload = {
             'query': query,
             'limit': limit
         }
-        return self._make_request(sub_url, payload=payload)
+        return self._make_request(sub_url, payload=payload, method='POST')
 
     def synonyms(self, wordphrase, top_k=8):
         method = 'GET'
@@ -195,9 +243,7 @@ class MSRester(object):
         return self._make_request(sub_url)
 
 
-
-
-class MatstractRestError(Exception):
+class MatScholarRestError(Exception):
     """
     Exception class for MatstractRester.
     Raised when the query has problems, e.g., bad query format.
