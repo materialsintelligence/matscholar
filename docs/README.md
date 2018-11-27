@@ -1,7 +1,7 @@
 
 # Materials Scholar (matscholar)
 
-*NOTE: This library is currently being migrated from another repository and is not yet functional. Please check back later for the functional version.*
+**NOTE: This library is currently being migrated from another repository and is not yet functional. Please check back later for the functional version.**
 
 Matscholar is a library for materials-focused NLP. It is maintained by a team of researchers at UC Berkeley and Lawrence Berkeley National Laboratory as part of a project funded by the Toyota Research Institute. 
 
