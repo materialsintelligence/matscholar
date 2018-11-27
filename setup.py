@@ -9,7 +9,7 @@ with open('LICENSE') as f:
 setup(
     name='matscholar',
     version='0.0.1',
-    description='The Materials Scholar Library',
+    description='matscholar: a Python library for interacting with the Matscholar database.',
     long_description=readme,
     author='Materials Scholar Development Team',
     author_email='jdagdelen@lbl.gov, vahe@tshitoyan.com, lweston@lbl.gov',
