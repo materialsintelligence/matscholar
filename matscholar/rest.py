@@ -7,7 +7,7 @@ from os import environ
 This module provides classes to interface with the Matstract REST
 API.
 
-To make use of the Matstract API, you need to obtain an API key by 
+To make use of the MatScholar API, you need to obtain an API key by 
 contacting John Dagdelen at jdagdelen@berkeley.edu.
 """
 
