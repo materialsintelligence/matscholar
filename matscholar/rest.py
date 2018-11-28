@@ -226,7 +226,7 @@ class Rester(object):
             'query': query,
             'limit': limit
         }
-        print(payload)
+
         return self._make_request(sub_url, payload=payload, method='POST')
 
     def synonyms(self, wordphrase, top_k=8):
@@ -259,7 +259,7 @@ class Rester(object):
             'material': material,
             'words': " ".join(words)
         }
-        print(payload)
+
         return self._make_request(sub_url, payload=payload, method=method)
 
 
