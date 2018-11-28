@@ -226,6 +226,7 @@ class Rester(object):
             'query': query,
             'limit': limit
         }
+
         return self._make_request(sub_url, payload=payload, method='POST')
 
     def synonyms(self, wordphrase, top_k=8):
@@ -235,12 +236,32 @@ class Rester(object):
             'wordphrase': wordphrase,
             'top_k': top_k
         }
-        return self._make_request(sub_url, payload=payload, )
+        return self._make_request(sub_url, payload=payload, method=method)
 
     def test(self, message):
         method = 'GET'
         sub_url = '/test/' + message
-        return self._make_request(sub_url)
+        return self._make_request(sub_url, method=method)
+
+    def materials_search(self, wordphrase, top_k=10):
+
+        method = "GET"
+        sub_url = '/embeddings/matsearch/{}'.format(wordphrase)
+        payload = {'top_k': top_k}
+
+        return self._make_request(sub_url, payload=payload, method=method)
+
+    def mentioned_with(self, material, words):
+
+        method = "GET"
+        sub_url = '/search/mentioned_with'
+        payload = {
+            'material': material,
+            'words': " ".join(words)
+        }
+
+        return self._make_request(sub_url, payload=payload, method=method)
+
 
 
 class MatScholarRestError(Exception):
