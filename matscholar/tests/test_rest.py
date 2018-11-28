@@ -1,4 +1,9 @@
 from matscholar import Rester
+import unittest
 
-r = Rester('gobears!')
-print(r.search({'material':['LiCoO2']}, limit=1))
+
+class EmbeddingEngineTest(unittest.TestCase):
+
+    def test_rester(self):
+        r = Rester()
+        self.assertIsNotNone(r.search({'material':['LiCoO2']}, limit=1))
