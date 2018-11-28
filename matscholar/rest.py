@@ -251,6 +251,14 @@ class Rester(object):
 
         return self._make_request(sub_url, payload=payload, method=method)
 
+    def close_words(self, wordphrase, top_k=10):
+
+        method = "GET"
+        sub_url = '/embeddings/close_words/{}'.format(wordphrase)
+        payload = {'top_k': top_k}
+
+        return self._make_request(sub_url, payload=payload, method=method)
+
     def mentioned_with(self, material, words):
 
         method = "GET"
