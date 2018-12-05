@@ -4,7 +4,7 @@ import warnings
 from os import environ
 
 """
-This module provides classes to interface with the Matstract REST
+This module provides classes to interface with the MatScholar REST
 API.
 
 To make use of the MatScholar API, you need to obtain an API key by 
@@ -14,7 +14,7 @@ contacting John Dagdelen at jdagdelen@berkeley.edu.
 __author__ = "John Dagdelen"
 __credits__ = "Shyue Ping Ong, Shreyas Cholia, Anubhav Jain"
 __copyright__ = "Copyright 2018, Materials Intelligence"
-__version__ = "1.0"
+__version__ = "0.1"
 __maintainer__ = "John Dagdelen"
 __email__ = "jdagdelen@berkeley.edu"
 __date__ = "October 3, 2018"
@@ -229,33 +229,24 @@ class Rester(object):
 
         return self._make_request(sub_url, payload=payload, method='POST')
 
-    def synonyms(self, wordphrase, top_k=8):
-        method = 'GET'
-        sub_url = '/synonyms/'
-        payload = {
-            'wordphrase': wordphrase,
-            'top_k': top_k
-        }
-        return self._make_request(sub_url, payload=payload, method=method)
-
     def test(self, message):
         method = 'GET'
         sub_url = '/test/' + message
         return self._make_request(sub_url, method=method)
 
-    def materials_search(self, wordphrase, top_k=10):
+    def materials_search(self, positive, negative=None, ignore_missing=True, top_k=10):
 
         method = "GET"
-        sub_url = '/embeddings/matsearch/{}'.format(wordphrase)
-        payload = {'top_k': top_k}
+        sub_url = '/embeddings/matsearch/{}'.format(positive)
+        payload = {'top_k': top_k, 'negative': negative, 'ignore_missing': ignore_missing}
 
         return self._make_request(sub_url, payload=payload, method=method)
 
-    def close_words(self, wordphrase, top_k=10):
+    def close_words(self, positive, negative=None, ignore_missing=True, top_k=10):
 
         method = "GET"
-        sub_url = '/embeddings/close_words/{}'.format(wordphrase)
-        payload = {'top_k': top_k}
+        sub_url = '/embeddings/close_words/{}'.format(positive)
+        payload = {'top_k': top_k, 'negative': negative, 'ignore_missing': ignore_missing}
 
         return self._make_request(sub_url, payload=payload, method=method)
 
@@ -269,7 +260,6 @@ class Rester(object):
         }
 
         return self._make_request(sub_url, payload=payload, method=method)
-
 
 
 class MatScholarRestError(Exception):
