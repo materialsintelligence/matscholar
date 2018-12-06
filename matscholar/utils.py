@@ -10,7 +10,8 @@ def parse_word_expression(expr):
         if expr[i:i+2] != " +" and expr[i:i+2] != " -":
             last_word += expr[i]
         else:
-            positive.append(last_word.strip()) if is_positive else negative.append(last_word.strip())
+            if last_word.strip():
+                positive.append(last_word.strip()) if is_positive else negative.append(last_word.strip())
             is_positive, last_word, i = expr[i:i+2] == " +", "", i + 1
         i += 1
     if last_word.strip():
