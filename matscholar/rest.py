@@ -94,17 +94,26 @@ class Rester(object):
 
     def materials_search(self, positive, negative=None, ignore_missing=True, top_k=10):
 
+        if not isinstance(positive, list):
+            positive = [positive]
+        if negative and not isinstance(negative, list):
+            negative = [negative]
         method = "GET"
         sub_url = '/embeddings/matsearch/{}'.format(",".join(positive))
-        payload = {'top_k': top_k, 'negative': ",".join(negative), 'ignore_missing': ignore_missing}
+        payload = {'top_k': top_k, 'negative': ",".join(negative) if negative else None, 'ignore_missing': ignore_missing}
 
         return self._make_request(sub_url, payload=payload, method=method)
 
     def close_words(self, positive, negative=None, ignore_missing=True, top_k=10):
 
+        if not isinstance(positive, list):
+            positive = [positive]
+        if negative and not isinstance(negative, list):
+            negative = [negative]
+
         method = "GET"
         sub_url = '/embeddings/close_words/{}'.format(",".join(positive))
-        payload = {'top_k': top_k, 'negative': ",".join(negative), 'ignore_missing': ignore_missing}
+        payload = {'top_k': top_k, 'negative': ",".join(negative) if negative else None, 'ignore_missing': ignore_missing}
 
         return self._make_request(sub_url, payload=payload, method=method)
 

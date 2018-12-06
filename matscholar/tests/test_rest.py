@@ -25,25 +25,35 @@ class EmbeddingEngineTest(unittest.TestCase):
     def test_close_words(self):
 
         # test data
-        positives = ["thermoelectric figure of merit", "Piezoelectric asdasdfasasd"]
-        negatives = [None, "Perovskite"]
-        top_ks = [10, 5]
-        ignore_missing = [False, True]
+        positives = ["thermoelectric figure of merit", "Piezoelectric asdasdfasasd", "thermoelectric,Perovskite"]
+        negatives = [None, "Perovskite", "anode,cathode"]
+        top_ks = [10, 5, 5]
+        ignore_missing = [False, True, True]
 
         # expected response
         close_words = [
             ['ZT', 'figure_of_merit_ZT', 'thermoelectric_figure_of_merit_ZT', 'seebeck_coefficient', 'zT',
              'thermoelectric_figure_-_of_-_merit', 'thermoelectric_power_factor', 'ZT_value', 'ZT_values',
              'dimensionless_figure_of_merit'],
-            ['d31', 'electromechanical', 'electromechanical_coupling', 'd33', 'pC']
+            ['d31', 'electromechanical', 'electromechanical_coupling', 'd33', 'pC'],
+            ['thermoelectric_properties', 'Cs2AgBiBr6', 'perovskites', 'tetradymite_-_like', 'ABX3']
 
         ]
         scores = [
             [0.865725, 0.862376, 0.849371, 0.847059, 0.843266, 0.835109, 0.831514, 0.82924, 0.825901, 0.822744],
-            [0.465956, 0.463872, 0.458091, 0.457684, 0.436465]
+            [0.465956, 0.463872, 0.458091, 0.457684, 0.436465],
+            [0.356694, 0.335016, 0.329782, 0.319091, 0.314465]
         ]
-        processed_positives = [['thermoelectric_figure_of_merit'], ["piezoelectric"]]
-        processed_negatives = [[], ["perovskite"]]
+        processed_positives = [
+            ['thermoelectric_figure_of_merit'],
+            ["piezoelectric"],
+            ["thermoelectric", "perovskite"]
+        ]
+        processed_negatives = [
+            [],
+            ["perovskite"],
+            ["anode", "cathode"]
+        ]
 
         # running the tests
         for p, n, tk, im, cw, sc, pp, pn in zip(
