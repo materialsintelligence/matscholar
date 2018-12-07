@@ -1,6 +1,7 @@
 from matscholar import Rester
 import numpy.testing as npt
 import unittest
+import numpy as np
 
 
 class EmbeddingEngineTest(unittest.TestCase):
@@ -14,7 +15,8 @@ class EmbeddingEngineTest(unittest.TestCase):
         self.assertListEqual(top_thermoelectrics["materials"], ['Bi2Te3', 'MgAgSb', 'PbTe', 'PbSe0.5Te0.5',
                                                                 'In0.25Co3FeSb12', '(Bi0.15Sb0.85)2Te3', 'CoSb3',
                                                                 'Bi0.4Sb1.6Te3', 'CeFe3CoSb12', 'Bi0.5Sb1.5Te3'])
-        self.assertEqual(top_thermoelectrics["original_wordphrase"], "thermoelectric")
+        self.assertEqual(top_thermoelectrics["original_positive"], "thermoelectric")
+        self.assertEqual(top_thermoelectrics["original_negative"], "")
         npt.assert_array_almost_equal(top_thermoelectrics["scores"], [0.19262796640396118, 0.13790667057037354,
                                                                       0.12772011756896973, 0.1259261965751648,
                                                                       0.12495005130767822, 0.12300053983926773,
@@ -67,7 +69,8 @@ class EmbeddingEngineTest(unittest.TestCase):
                 processed_negatives):
             zt_words = self.r.close_words(p, negative=n, ignore_missing=im, top_k=tk)
 
-            self.assertEqual(zt_words["original_wordphrase"], p)
+            self.assertEqual(zt_words["original_positive"], p)
+            self.assertEqual(zt_words["original_negative"], n if n else "")
             self.assertListEqual(zt_words["close_words"], cw)
             npt.assert_array_almost_equal(zt_words["scores"], sc)
 
@@ -89,8 +92,66 @@ class EmbeddingEngineTest(unittest.TestCase):
         # running the tests
         for m, w, mw in zip(materials, words, mentioned_with):
 
-            response_dict = self.r.mentioned_with(material=m, words=w)
+            result = self.r.mentioned_with(material=m, words=w)
+            self.assertEqual(result, mw)
 
-            self.assertEqual(response_dict["mentioned_with"], mw)
-            self.assertEqual(response_dict["material"], m)
-            self.assertEqual(response_dict["words"], w)
+    def test_process_sentence(self):
+        # test data
+        text = ["We measured 100 materials, including Ni(CO)4 and obtained very "
+                "high Thermoelectric Figures of merit ZT. It was great.",
+                "Fe(II) was oxidized to obtain 5mol Ferrous Oxide.",
+                "The thermoelectric figure of merit of Li2CuSb has not been reported yet."]
+        processed_text = [
+            ["we measured <nUm> materials including C4NiO4 and obtained very "
+             "high thermoelectric figures of merit ZT".split(), "it was great".split()],
+            ["Fe (II) was oxidized to obtain <nUm> mol ferrous oxide .".split()],
+            ["the thermoelectric_figure_of_merit of CuLi2Sb has not_been reported yet .".split()]
+        ]
+        exclude_punct = [True, False, False]
+        phrases = [False, False, True]
+
+        # valid requests
+        for t, pt, ep, phr in zip(text, processed_text, exclude_punct, phrases):
+            processed_text = self.r.process_text(t, exclude_punct=ep, phrases=phr)
+
+            self.assertEqual(processed_text, pt)
+
+    def test_get_embedding(self):
+        # test data
+        wordphrases = [
+            "Thermoelectric",
+            "Solar cells",
+            "asdfsdfgsregbndffff Thermoelectric",
+            "asdfsdfgsregbndffff Thermoelectric",
+            ["Thermoelectric", "Solar cells"],
+            ["Thermoelectric solar cells", "Superconducting Randomtextthatsnotthere", "Te3Bi2"],
+            ["Thermoelectric solar cells", "Superconducting Randomtextthatsnotthere", "Bi2Te3"],
+            [],
+            ["asdfsdfgsregbndffff", "Thermoelectric"],
+            ["asdfsdfgsregbndffff"]
+        ]
+        ignore_missing = [False, False, True, False, False, False, True, False, True, True]
+        processed_wordphrases = [
+            [["thermoelectric"]],
+            [["solar_cells"]],
+            [["thermoelectric"]],
+            [["asdfsdfgsregbndffff", "thermoelectric"]],
+            [["thermoelectric"], ["solar_cells"]],
+            [["thermoelectric", "solar_cells"], ["superconducting", "randomtextthatsnotthere"], ["Bi2Te3"]],
+            [["thermoelectric", "solar_cells"], ["superconducting"], ["Bi2Te3"]],
+            [],
+            [[], ["thermoelectric"]],
+            [[]]
+        ]
+        embedding_shapes = [
+            (1, 200), (1, 200), (1, 200), (1, 200), (2, 200), (3, 200), (3, 200), (0, ), (2, 200), (1, 200)
+        ]
+
+        # valid request
+        for wps, pwps, es, im in zip(wordphrases, processed_wordphrases, embedding_shapes, ignore_missing):
+            response_dict = self.r.get_embedding(wps, ignore_missing=im)
+
+            self.assertEqual(response_dict["original_wordphrases"], wps)
+            self.assertEqual(response_dict["processed_wordphrases"], pwps)
+
+            self.assertEqual(np.asarray(response_dict["embeddings"]).shape, es)
