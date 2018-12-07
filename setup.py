@@ -8,7 +8,7 @@ with open('LICENSE') as f:
 
 setup(
     name='matscholar',
-    version='0.0.1',
+    version='0.0.2',
     description='matscholar: a Python library for interacting with the Matscholar database.',
     long_description=readme,
     author='Materials Scholar Development Team',

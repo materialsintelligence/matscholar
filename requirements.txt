@@ -2,3 +2,9 @@ pyyaml
 requests
 pytest
 numpy
+unidecode
+regex
+monty
+pymatgen
+gensim
+chemdataextractor

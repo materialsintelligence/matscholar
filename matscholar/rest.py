@@ -139,44 +139,6 @@ class Rester(object):
 
         return self._make_request(sub_url, payload=payload, method=method)
 
-    def mentioned_with(self, material, words):
-        """
-        Given a material formula and a list of words, returns True if the material was mentioned with any of the words
-        in our corpus of abstracts, otherwise returns False
-        :param material: the material formula as a string
-        :param words: a list of words and phrases (pre-processed, phrases separated by _, words lower cased, etc.)
-        :return: True or False
-        """
-
-        method = "GET"
-        sub_url = '/search/mentioned_with'
-        payload = {
-            'material': material,
-            'words': " ".join(words)
-        }
-
-        return self._make_request(sub_url, payload=payload, method=method)["mentioned_with"]
-
-    def process_text(self, text, exclude_punct=False, phrases=False):
-        """
-        Chemistry and Materials Science-aware pre-processing of text. Keeps the sentence structure, so returns a list
-        of lists of strings, with each string corresponding to a single token.
-        :param text: The input text
-        :param exclude_punct: If True, will remove punctuation (False by default)
-        :param phrases: If True, will convert single words to common materials science phrases separated by _
-        (False by default)
-        :return: processed text as a list of lists of strings
-        """
-
-        method = "GET"
-        sub_url = '/embeddings/preprocess/{}'.format(text)
-        payload = {
-            'exclude_punct': exclude_punct,
-            'phrases': phrases
-        }
-
-        return self._make_request(sub_url, payload=payload, method=method)["processed_text"]
-
     def get_embedding(self, wordphrases, ignore_missing=True):
         """
         Returns the embedding(s) for the supplied wordphrase. If the wordphrase is a string, returns a single embedding
