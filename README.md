@@ -15,13 +15,13 @@ We *highly* recommend using a [conda environment](https://conda.io/docs/user-gui
 4. `pip install .` [or](https://stackoverflow.com/questions/15724093/difference-between-python-setup-py-install-and-pip-install) `python setup.py install`
 
 
-### Configuring Your API Key
+## Configuring Your API Key
 The Materials Scholar API can only be accessed by providing an API key in `x-api-key` request header field. 
 To receive an API key to access the Materials Scholar API, please contact John Dagdelen at jdagdelen@lbl.gov.
 
 Once you have an API key, you can add it as an environment variable `MATSCHOLAR_API_KEY` for ease of use. 
 
-### Contributors
+## Contributors
 @jdagdelen, @vtshitoyan, @lweston
 
 
