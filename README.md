@@ -1,15 +1,19 @@
 # Materials Scholar (matscholar)
 
-*NOTE: This library is currently being migrated from another repository and is not yet functional. Please check back later for the functional version.*
+`matscholar` is a Python library for materials-focused natural language processing (NLP). It is maintained by a team of researchers at UC Berkeley and Lawrence Berkeley National Laboratory as part of a project funded by the Toyota Research Institute.
 
-Matscholar is a library for materials-focused NLP. It is maintained by a team of researchers at UC Berkeley and Lawrence Berkeley National Laboratory as part of a project funded by the Toyota Research Institute. 
-
-This library provides a Python interface for interacting with the Materials Scholar API, performing basic NLP tasks on scientific literature, and example notebooks on using these tools for materials discovery and design. 
+This library provides a Python interface for interacting with the Materials Scholar API, performing basic NLP tasks on scientific text, and example notebooks on using these tools for materials discovery and design.
 
 
 ## Setup
 
-We *highly* recommend using a [conda environment](https://conda.io/docs/user-guide/tasks/manage-environments.html) when working with materials scholar tools. Below is a guide on how to set an environment variable with your api key so you don't have to supply it each time you create an instance of the Rester. 
+We *highly* recommend using a [conda environment](https://conda.io/docs/user-guide/tasks/manage-environments.html) when working with materials scholar tools.
+
+1. Clone or download this repo
+2. Navigate to the root directory (matscholar)
+3. `pip install -r requirements.txt`
+4. `pip install .` [or](https://stackoverflow.com/questions/15724093/difference-between-python-setup-py-install-and-pip-install) `python setup.py install`
+
 
 ### Configuring Your API Key
 The Materials Scholar API can only be accessed by providing an API key in `x-api-key` request header field. 

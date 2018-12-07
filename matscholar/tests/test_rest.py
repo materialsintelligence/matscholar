@@ -77,45 +77,6 @@ class EmbeddingEngineTest(unittest.TestCase):
             self.assertListEqual(zt_words["positive"], pp)
             self.assertListEqual(zt_words["negative"], pn)
 
-    def test_mentioned_with(self):
-
-        # test data
-        materials = ["Te3Bi2", "Cu7Te5"]
-        words = [
-            ["thermoelectric", "solar_cell"],
-            ["thermoelectric", "ZT"]
-        ]
-
-        # expected response
-        mentioned_with = [True, False]
-
-        # running the tests
-        for m, w, mw in zip(materials, words, mentioned_with):
-
-            result = self.r.mentioned_with(material=m, words=w)
-            self.assertEqual(result, mw)
-
-    def test_process_sentence(self):
-        # test data
-        text = ["We measured 100 materials, including Ni(CO)4 and obtained very "
-                "high Thermoelectric Figures of merit ZT. It was great.",
-                "Fe(II) was oxidized to obtain 5mol Ferrous Oxide.",
-                "The thermoelectric figure of merit of Li2CuSb has not been reported yet."]
-        processed_text = [
-            ["we measured <nUm> materials including C4NiO4 and obtained very "
-             "high thermoelectric figures of merit ZT".split(), "it was great".split()],
-            ["Fe (II) was oxidized to obtain <nUm> mol ferrous oxide .".split()],
-            ["the thermoelectric_figure_of_merit of CuLi2Sb has not_been reported yet .".split()]
-        ]
-        exclude_punct = [True, False, False]
-        phrases = [False, False, True]
-
-        # valid requests
-        for t, pt, ep, phr in zip(text, processed_text, exclude_punct, phrases):
-            processed_text = self.r.process_text(t, exclude_punct=ep, phrases=phr)
-
-            self.assertEqual(processed_text, pt)
-
     def test_get_embedding(self):
         # test data
         wordphrases = [
