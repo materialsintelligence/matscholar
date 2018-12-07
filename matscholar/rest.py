@@ -93,6 +93,17 @@ class Rester(object):
             raise MatScholarRestError(msg)
 
     def materials_search(self, positive, negative=None, ignore_missing=True, top_k=10):
+        """
+        Given input strings or lists of positive and negative words / phrases, returns a ranked list of materials with
+        corresponding scores and numbers of mentions
+        :param positive: a string or a list of strings used as a positive search criterion
+        :param negative: a string or a list of strings used as a negative search criterion
+        :param ignore_missing: if True, ignore words missing from the embedding vocabulary, otherwise generate "guess"
+        embeddings
+        :param top_k: number of top results to return (10 by default)
+        :return: a dictionary with the following keys ["materials", "counts", "scores", "positive", "negative",
+                                                                    "original_negative", "original_positive"]
+        """
 
         if not isinstance(positive, list):
             positive = [positive]
@@ -105,6 +116,17 @@ class Rester(object):
         return self._make_request(sub_url, payload=payload, method=method)
 
     def close_words(self, positive, negative=None, ignore_missing=True, top_k=10):
+        """
+        Given input strings or lists of positive and negative words / phrases, returns a list of most similar words /
+        phrases according to cosine similarity
+        :param positive: a string or a list of strings used as positive contributions to the cumulative embedding
+        :param negative: a string or a list of strings used as negative contributions to the cumulative embedding
+        :param ignore_missing: if True, ignore words missing from the embedding vocabulary, otherwise generate "guess"
+        embeddings
+        :param top_k: number of top results to return (10 by default)
+        :return: a dictionary with the following keys ["close_words", "scores", "positive", "negative",
+                                                                    "original_negative", "original_positive"]
+        """
 
         if not isinstance(positive, list):
             positive = [positive]
@@ -118,6 +140,13 @@ class Rester(object):
         return self._make_request(sub_url, payload=payload, method=method)
 
     def mentioned_with(self, material, words):
+        """
+        Given a material formula and a list of words, returns True if the material was mentioned with any of the words
+        in our corpus of abstracts, otherwise returns False
+        :param material: the material formula as a string
+        :param words: a list of words and phrases (pre-processed, phrases separated by _, words lower cased, etc.)
+        :return: True or False
+        """
 
         method = "GET"
         sub_url = '/search/mentioned_with'
@@ -125,6 +154,54 @@ class Rester(object):
             'material': material,
             'words': " ".join(words)
         }
+
+        return self._make_request(sub_url, payload=payload, method=method)["mentioned_with"]
+
+    def process_text(self, text, exclude_punct=False, phrases=False):
+        """
+        Chemistry and Materials Science-aware pre-processing of text. Keeps the sentence structure, so returns a list
+        of lists of strings, with each string corresponding to a single token.
+        :param text: The input text
+        :param exclude_punct: If True, will remove punctuation (False by default)
+        :param phrases: If True, will convert single words to common materials science phrases separated by _
+        (False by default)
+        :return: processed text as a list of lists of strings
+        """
+
+        method = "GET"
+        sub_url = '/embeddings/preprocess/{}'.format(text)
+        payload = {
+            'exclude_punct': exclude_punct,
+            'phrases': phrases
+        }
+
+        return self._make_request(sub_url, payload=payload, method=method)["processed_text"]
+
+    def get_embedding(self, wordphrases, ignore_missing=True):
+        """
+        Returns the embedding(s) for the supplied wordphrase. If the wordphrase is a string, returns a single embedding
+        vector as a list. If the wordphrase is a list of string, returns a matrix with each row corresponding to a single
+        (potentially cumulative) embedding. If the words (after pre-processing) do not have embeddings and
+        ignore_missing is set to True, a list of all 0s is returned
+        :param wordphrases: a string or a list of strings
+        :param ignore_missing: if True, will ignore missing words, otherwise will guess embeddings based on
+        string similarity
+        :return: a dictionary with following keys ["original_wordphrases", "processed_wordphrases", "embeddings"]
+        """
+
+        if isinstance(wordphrases, list):
+            method = "POST"
+            sub_url = '/embeddings'
+            payload = {
+                'wordphrases': wordphrases,
+                'ignore_missing': ignore_missing
+            }
+        else:
+            method = "GET"
+            sub_url = '/embeddings/{}'.format(wordphrases)
+            payload = {
+                'ignore_missing': ignore_missing
+            }
 
         return self._make_request(sub_url, payload=payload, method=method)
 
