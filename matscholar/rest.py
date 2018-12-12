@@ -167,6 +167,24 @@ class Rester(object):
 
         return self._make_request(sub_url, payload=payload, method=method)
 
+    def materials_map(self, highlight, limit=-1, ignore_missing=True):
+        """
+        Returns data for a plotly dash scatter plot, highlighted according to cosine similarity to highlight
+        :param highlight: a string or a list of strings according to which materials should be highlighted
+        :param limit: number of top materials (sorted by number of mentions) to show
+        :param ignore_missing: if True, will ignore missing words, otherwise will guess embeddings based on
+        string similarity
+        :return: a dictionary with following keys: ["x", "y", "text", "marker"]
+        """
+
+        if not isinstance(highlight, list):
+            highlight = [highlight]
+        method = "GET"
+        sub_url = '/embeddings/materials_map/{}'.format(",".join(highlight))
+        payload = {'limit': limit, 'ignore_missing': ignore_missing}
+
+        return self._make_request(sub_url, payload=payload, method=method)
+
 
 class MatScholarRestError(Exception):
     """

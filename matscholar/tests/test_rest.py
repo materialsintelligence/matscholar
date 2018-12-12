@@ -116,3 +116,32 @@ class EmbeddingEngineTest(unittest.TestCase):
             self.assertEqual(response_dict["processed_wordphrases"], pwps)
 
             self.assertEqual(np.asarray(response_dict["embeddings"]).shape, es)
+
+    def test_materials_map(self):
+
+        highlights = [
+            "Thermoelectric"
+        ]
+        ignore_missing = [True]
+        limit = [None]
+
+        first3materials = [
+
+        ]
+        first3scores = [
+
+        ]
+        processed_highlights = [
+            [["thermoelectric"]]
+        ]
+
+        for h, im, l, f3m, f3s, ph in \
+                zip(highlights, ignore_missing, limit, first3materials, first3scores, processed_highlights):
+
+            response = self.r.materials_map(highlight=h, ignore_missing=im, limit=l)
+
+            self.assertEqual(response["original_highlight"], h)
+            self.assertEqual(response["processed_highlight"], ph)
+
+            self.assertListEqual(response["plot_data"]["text"][:3], f3m)
+            npt.assert_array_almost_equal(response["plot_data"]["marker"]["color"][:3], f3s)
