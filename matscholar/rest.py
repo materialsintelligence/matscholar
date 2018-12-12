@@ -167,13 +167,14 @@ class Rester(object):
 
         return self._make_request(sub_url, payload=payload, method=method)
 
-    def materials_map(self, highlight, limit=None, ignore_missing=True):
+    def materials_map(self, highlight, limit=None, ignore_missing=True, number_to_substring=False):
         """
         Returns data for a plotly dash scatter plot, highlighted according to cosine similarity to highlight
         :param highlight: a string or a list of strings according to which materials should be highlighted
         :param limit: number of top materials (sorted by number of mentions) to show
         :param ignore_missing: if True, will ignore missing words, otherwise will guess embeddings based on
         string similarity
+        :param number_to_substring: if true, will convert numbers in chemical formula to substrings
         :return: a dictionary with following keys: ["x", "y", "text", "marker"]
         """
 
@@ -181,7 +182,10 @@ class Rester(object):
             highlight = [highlight]
         method = "GET"
         sub_url = '/materials_map'
-        payload = {'highlight': highlight, 'limit': limit, 'ignore_missing': ignore_missing}
+        payload = {'highlight': highlight,
+                   'limit': limit,
+                   'ignore_missing': ignore_missing,
+                   'number_to_substring': number_to_substring}
 
         return self._make_request(sub_url, payload=payload, method=method)
 

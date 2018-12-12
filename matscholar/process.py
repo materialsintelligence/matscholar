@@ -304,14 +304,3 @@ class MatScholarProcess:
         """
         # there is a problem with angstrom sometimes, so ignoring length 1 strings
         return unidecode.unidecode(txt) if len(txt) > 1 else txt
-
-
-def number_to_substring(text, latex=False):
-    """
-    Converts numbers in chemical formulas to substrings (mostly for displays in plots)
-    :param text:
-    :param latex:
-    :return:
-    """
-    return regex.sub("(\d*\.?\d+)", r'_\1', text) if latex else regex.sub("(\d*\.?\d+)", r'<sub>\1</sub>', text)
-
