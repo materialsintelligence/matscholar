@@ -167,7 +167,7 @@ class Rester(object):
 
         return self._make_request(sub_url, payload=payload, method=method)
 
-    def materials_map(self, highlight, limit=-1, ignore_missing=True):
+    def materials_map(self, highlight, limit=None, ignore_missing=True):
         """
         Returns data for a plotly dash scatter plot, highlighted according to cosine similarity to highlight
         :param highlight: a string or a list of strings according to which materials should be highlighted
@@ -177,11 +177,11 @@ class Rester(object):
         :return: a dictionary with following keys: ["x", "y", "text", "marker"]
         """
 
-        if not isinstance(highlight, list):
+        if highlight is not None and not isinstance(highlight, list):
             highlight = [highlight]
         method = "GET"
-        sub_url = '/embeddings/materials_map/{}'.format(",".join(highlight))
-        payload = {'limit': limit, 'ignore_missing': ignore_missing}
+        sub_url = '/materials_map'
+        payload = {'highlight': highlight, 'limit': limit, 'ignore_missing': ignore_missing}
 
         return self._make_request(sub_url, payload=payload, method=method)
 

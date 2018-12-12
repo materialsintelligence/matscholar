@@ -120,19 +120,23 @@ class EmbeddingEngineTest(unittest.TestCase):
     def test_materials_map(self):
 
         highlights = [
-            "Thermoelectric"
+            "Thermoelectric",
+            ""
         ]
-        ignore_missing = [True]
-        limit = [None]
+        ignore_missing = [True, True]
+        limit = [None, None]
 
         first3materials = [
-
+            ["Bi2Te3", "PbTe", "PbSe0.5Te0.5"],
+            ["V", "TiO2", "Ag"]
         ]
         first3scores = [
-
+            [0.19262794200173894, 0.12772010975015763, 0.12592619653180906],
+            [np.nan, np.nan, np.nan]
         ]
         processed_highlights = [
-            [["thermoelectric"]]
+            [["thermoelectric"]],
+            [[]]
         ]
 
         for h, im, l, f3m, f3s, ph in \
