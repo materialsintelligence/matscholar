@@ -167,6 +167,32 @@ class Rester(object):
 
         return self._make_request(sub_url, payload=payload, method=method)
 
+    def search_ents(self, query):
+        '''
+        Get the entities in each document associated with a given query
+
+        :param query: dict; e.g., {'material': ['GaN', '-InN']), 'application': ['LED']}
+        :return: list of dicts; each dict represents a document and contains the extracted entities
+        '''
+        method = 'POST'
+        sub_url = '/ent_search'
+        payload = query
+
+        return self._make_request(sub_url, payload=payload, method=method)
+
+    def get_summary(self, query):
+        '''
+        Get a summary of the entities associated with a given query
+
+        :param query: dict; e.g., {'material': ['GaN', '-InN']), 'application': ['LED']}
+        :return: dict; a summary dict with keys for each entity type
+        '''
+        method = 'POST'
+        sub_url = '/ent_search/summary'
+        payload = query
+
+        return self._make_request(sub_url, payload=payload, method=method)
+
 
 class MatScholarRestError(Exception):
     """
@@ -174,3 +200,4 @@ class MatScholarRestError(Exception):
     Raised when the query has problems, e.g., bad query format.
     """
     pass
+
