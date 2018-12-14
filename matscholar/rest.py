@@ -194,6 +194,7 @@ class Rester(object):
         return self._make_request(sub_url, payload=payload, method=method)
 
 
+
 class MatScholarRestError(Exception):
     """
     Exception class for MatstractRester.
@@ -201,3 +202,11 @@ class MatScholarRestError(Exception):
     """
     pass
 
+if __name__ == '__main__':
+    query = {
+        'material' : ['GaN', '-InN'],
+        'application' : ['LED']
+    }
+    query = json.dumps(query)
+    rest = Rester()
+    print(rest.get_summary(query))
