@@ -143,7 +143,7 @@ class EmbeddingEngineTest(unittest.TestCase):
             ["x", "y"],
             ["x", "y", "z"]
         ]
-        nr_mats = [12285, 1218]
+        nr_mats = [12285, 1988]
 
         for h, im, l, d, f3m, f3s, ph, c, nm in \
                 zip(highlights, ignore_missing, limit, dims, first3materials,
