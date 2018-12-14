@@ -143,7 +143,7 @@ class MatScholarProcess:
         :param convert_num: bool flag to convert numbers (selectively) to <nUm>
         :param normalize_materials: bool flag to normalize all simple material formula
         :param remove_accents: bool flag to remove accents, e.g. Néel -> Neel
-        :param make_phrases: bool flat to convert single tokens to common materials science phrases
+        :param make_phrases: bool flag to convert single tokens to common materials science phrases
         :param split_oxidation: only used if string is supplied, see docstring for tokenize method
         :return: (processed_tokens, material_list)
         """

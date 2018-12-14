@@ -1,6 +1,6 @@
-# matscholar
+<img src="docs/matscholar_logo.png" alt="matscholar logo" width="300px">
 
-MatScholar (Materials Scholar) is a Python library for materials-focused natural language processing (NLP). It is maintained by a team of researchers at UC Berkeley and Lawrence Berkeley National Laboratory as part of a project funded by the Toyota Research Institute.
+`matscholar` (Materials Scholar) is a Python library for materials-focused natural language processing (NLP). It is maintained by a team of researchers at UC Berkeley and Lawrence Berkeley National Laboratory as part of a project funded by the Toyota Research Institute.
 
 This library provides a Python interface for interacting with the Materials Scholar API, performing basic NLP tasks on scientific text, and example notebooks on using these tools for materials discovery and design.
 
@@ -23,5 +23,3 @@ Once you have an API key, you can add it as an environment variable `MATSCHOLAR_
 
 ## Contributors
 @jdagdelen, @vtshitoyan, @lweston
-
-

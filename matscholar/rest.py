@@ -167,6 +167,30 @@ class Rester(object):
 
         return self._make_request(sub_url, payload=payload, method=method)
 
+    def materials_map(self, highlight, limit=None, ignore_missing=True, number_to_substring=False, dims=2):
+        """
+        Returns data for a plotly dash scatter plot, highlighted according to cosine similarity to highlight
+        :param highlight: a string or a list of strings according to which materials should be highlighted
+        :param limit: number of top materials (sorted by number of mentions) to show
+        :param ignore_missing: if True, will ignore missing words, otherwise will guess embeddings based on
+        string similarity
+        :param number_to_substring: if true, will convert numbers in chemical formula to substrings
+        :param dims: 2 or 3, determines if the map is 2D or 3D
+        :return: a dictionary with following keys: ["x", "y", "text", "marker"]
+        """
+
+        if highlight is not None and not isinstance(highlight, list):
+            highlight = [highlight]
+        method = "GET"
+        sub_url = '/materials_map'
+        payload = {'highlight': highlight,
+                   'limit': limit,
+                   'ignore_missing': ignore_missing,
+                   'number_to_substring': number_to_substring,
+                   'dims': dims}
+
+        return self._make_request(sub_url, payload=payload, method=method)
+      
     def search_ents(self, query):
         '''
         Get the entities in each document associated with a given query
@@ -192,8 +216,6 @@ class Rester(object):
         payload = query
 
         return self._make_request(sub_url, payload=payload, method=method)
-
-
 
 class MatScholarRestError(Exception):
     """

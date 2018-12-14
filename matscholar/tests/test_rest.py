@@ -117,6 +117,52 @@ class EmbeddingEngineTest(unittest.TestCase):
 
             self.assertEqual(np.asarray(response_dict["embeddings"]).shape, es)
 
+    def test_materials_map(self):
+
+        highlights = [
+            "Thermoelectric",
+            ""
+        ]
+        ignore_missing = [True, True]
+        limit = [None, None]
+        dims = [2, 3]
+
+        first3materials = [
+            ["Bi2Te3", "PbTe", "PbSe0.5Te0.5"],
+            ["V", "TiO2", "Ag"]
+        ]
+        first3scores = [
+            [0.19262794200173894, 0.12772010975015763, 0.12592619653180906],
+            [np.nan, np.nan, np.nan]
+        ]
+        processed_highlights = [
+            [["thermoelectric"]],
+            [[]]
+        ]
+        coords = [
+            ["x", "y"],
+            ["x", "y", "z"]
+        ]
+        nr_mats = [12285, 1988]
+
+        for h, im, l, d, f3m, f3s, ph, c, nm in \
+                zip(highlights, ignore_missing, limit, dims, first3materials,
+                    first3scores, processed_highlights, coords, nr_mats):
+
+            response = self.r.materials_map(highlight=h, ignore_missing=im, limit=l, dims=d)
+
+            self.assertEqual(response["original_highlight"], h)
+            self.assertEqual(response["processed_highlight"], ph)
+
+            for xyz in c:
+                self.assertIn(xyz, response["plot_data"])
+            self.assertListEqual(response["plot_data"]["text"][:3], f3m)
+            npt.assert_array_almost_equal(response["plot_data"]["marker"]["color"][:3], f3s)
+
+            self.assertEqual(len(response["plot_data"]["text"]), nm)
+            self.assertEqual(len(response["plot_data"]["x"]), nm)
+            self.assertEqual(len(response["plot_data"]["y"]), nm)
+          
 class EntSearchTest(unittest.TestCase):
 
     rester = Rester()
