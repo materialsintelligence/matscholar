@@ -162,3 +162,24 @@ class EmbeddingEngineTest(unittest.TestCase):
             self.assertEqual(len(response["plot_data"]["text"]), nm)
             self.assertEqual(len(response["plot_data"]["x"]), nm)
             self.assertEqual(len(response["plot_data"]["y"]), nm)
+          
+class EntSearchTest(unittest.TestCase):
+
+    rester = Rester()
+    KEYS = ['doi', 'MAT', 'PRO', 'APL', 'SPL', 'DSC', 'SMT', 'CMT']
+    test_query = {
+        'material': ['GaN'],
+        'application': ['LED']
+    }
+
+    def test_ent_search(self):
+
+        result = self.rester.search_ents(self.test_query)
+        self.assertEqual(len(result), 738)
+        self.assertTrue(all(key in result[0].keys() for key in self.KEYS))
+
+    def test_summary(self):
+        result = self.rester.get_summary(self.test_query)
+        self.assertEqual(result['MAT'][0][1], 738)
+        subkeys = [key for key in self.KEYS if key != 'doi']
+        self.assertTrue(all(key in result for key in subkeys))
