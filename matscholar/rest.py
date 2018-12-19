@@ -46,7 +46,7 @@ class Rester(object):
     """
 
     def __init__(self, api_key=None,
-                 endpoint="http://api.matscholar.com:8080"):
+                 endpoint="http://54.183.169.253:8080"):
         if api_key is not None:
             self.api_key = api_key
         else:
