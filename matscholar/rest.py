@@ -45,13 +45,9 @@ class Rester(object):
             urls implementing a similar interface.
     """
 
-    def __init__(self, api_key=None,
-                 endpoint="http://54.183.169.253:8080"):
-        if api_key is not None:
-            self.api_key = api_key
-        else:
-            self.api_key = environ['MATERIALS_SCHOLAR_API_KEY']
-        self.preamble = endpoint
+    def __init__(self, api_key=None, endpoint=None):
+        self.api_key = api_key if api_key else environ['MATERIALS_SCHOLAR_API_KEY']
+        self.preamble = endpoint if endpoint else environ['MATERIALS_SCHOLAR_ENDPOINT']
         self.session = requests.Session()
         self.session.headers = {"x-api-key": self.api_key}
 
@@ -217,12 +213,14 @@ class Rester(object):
 
         return self._make_request(sub_url, payload=payload, method=method)
 
+
 class MatScholarRestError(Exception):
     """
     Exception class for MatstractRester.
     Raised when the query has problems, e.g., bad query format.
     """
     pass
+
 
 if __name__ == '__main__':
     query = {
