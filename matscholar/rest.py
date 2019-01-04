@@ -213,6 +213,11 @@ class Rester(object):
 
         return self._make_request(sub_url, payload=payload, method=method)
 
+    def get_similar_materials(self, material):
+        method = "GET"
+        sub_url = '/materials/similar/{}'.format(material)
+        return self._make_request(sub_url, method=method)
+
 
 class MatScholarRestError(Exception):
     """
@@ -222,11 +227,3 @@ class MatScholarRestError(Exception):
     pass
 
 
-if __name__ == '__main__':
-    query = {
-        'material' : ['GaN', '-InN'],
-        'application' : ['LED']
-    }
-    query = json.dumps(query)
-    rest = Rester()
-    print(rest.get_summary(query))

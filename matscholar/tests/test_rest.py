@@ -183,3 +183,18 @@ class EntSearchTest(unittest.TestCase):
         self.assertEqual(result['MAT'][0][1], 738)
         subkeys = [key for key in self.KEYS if key != 'doi']
         self.assertTrue(all(key in result for key in subkeys))
+
+class SimilarMaterialsTest(unittest.TestCase):
+
+    rester = Rester()
+
+    def test_similar_materials(self):
+        material = 'LiCoO2'
+        result = self.rester.get_similar_materials(material)
+        self.assertEqual(len(result), 10)
+        similar_mats = ['CoLi2NiO4', 'Co3Li10Ni7O20', 'CoLi4Ni3O8', 'CoLi3MnO5', 'CoLi2O4Si',
+                        'FeLiO2', 'CoLi3MnNiO6', 'CoLi10Ni9O20', 'CoLiMnO4', 'Fe2Li3O4P']
+        self.assertEqual(result, similar_mats)
+
+
+
