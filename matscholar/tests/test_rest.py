@@ -175,12 +175,12 @@ class EntSearchTest(unittest.TestCase):
     def test_ent_search(self):
 
         result = self.rester.search_ents(self.test_query)
-        self.assertEqual(len(result), 738)
+        self.assertEqual(len(result), 1126)
         self.assertTrue(all(key in result[0].keys() for key in self.KEYS))
 
     def test_summary(self):
         result = self.rester.get_summary(self.test_query)
-        self.assertEqual(result['MAT'][0][1], 738)
+        self.assertEqual(result['MAT'][0][1], 1126)
         subkeys = [key for key in self.KEYS if key != 'doi']
         self.assertTrue(all(key in result for key in subkeys))
 
@@ -196,5 +196,32 @@ class SimilarMaterialsTest(unittest.TestCase):
                         'FeLiO2', 'CoLi3MnNiO6', 'CoLi10Ni9O20', 'CoLiMnO4', 'Fe2Li3O4P']
         self.assertEqual(result, similar_mats)
 
+class NERTest(unittest.TestCase):
+
+    rester = Rester()
+    TEST_DOCS = ["We synthesized AO2 (A = Sr, Ba) thin films. The band gap was 2.5 eV.",
+            "The lattice constant of ZnO is 3.8 A. This was measured using XRD."]
+
+    def test_iob(self):
+        tagged_docs = self.rester.get_ner_tags(self.TEST_DOCS, return_type="iob")
+        print(tagged_docs)
+        self.assertEqual(len(tagged_docs), 2)
+        self.assertEqual(len(tagged_docs[0]), 2)
+        self.assertEqual(tagged_docs[0][0][2][1], "B-MAT")
+
+    def test_concatenated(self):
+        tagged_docs = self.rester.get_ner_tags(self.TEST_DOCS, return_type="concatenated")
+        self.assertEqual(len(tagged_docs), 2)
+        self.assertEqual(len(tagged_docs[0]), 2)
+        self.assertEqual(tagged_docs[0][0][2][1], "MAT")
+        self.assertEqual(tagged_docs[0][0][2][0], "AO2 ( A = Sr , Ba )")
+        self.assertFalse(any("-" in tag for token, tag in tagged_docs[0][0]))
+
+    def test_normalized(self):
+        tagged_docs = self.rester.get_ner_tags(self.TEST_DOCS, return_type="normalized")
+        self.assertEqual(len(tagged_docs), 2)
+        self.assertEqual(len(tagged_docs[0]), 2)
+        self.assertEqual(tagged_docs[0][0][2][1], "MAT")
+        self.assertTrue(isinstance(tagged_docs[0][0][2][0], list))
 
 
