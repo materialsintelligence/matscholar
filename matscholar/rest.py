@@ -200,6 +200,20 @@ class Rester(object):
 
         return self._make_request(sub_url, payload=payload, method=method)
 
+    def get_journals(self, query):
+        '''
+
+        :param query: string: a paragraph
+        :return: list: [['journal name', 'cosine similarity'], ...]
+        '''
+
+        method = 'POST'
+        sub_url = '/journal_suggestion'
+        payload = {'abstract': query}
+
+        return self._make_request(sub_url, payload=payload, method=method)
+
+
     def get_summary(self, query):
         '''
         Get a summary of the entities associated with a given query
