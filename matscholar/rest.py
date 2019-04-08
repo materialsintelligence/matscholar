@@ -47,7 +47,7 @@ class Rester(object):
 
     def __init__(self, api_key=None, endpoint=None):
         self.api_key = api_key if api_key else environ['MATERIALS_SCHOLAR_API_KEY']
-        self.preamble = endpoint if endpoint else environ['MATERIALS_SCHOLAR_ENDPOINT']
+        self.preamble = endpoint if endpoint else "http://0.0.0.0:8080" #environ['MATERIALS_SCHOLAR_ENDPOINT']
         self.session = requests.Session()
         self.session.headers = {"x-api-key": self.api_key}
 
@@ -188,35 +188,60 @@ class Rester(object):
         return self._make_request(sub_url, payload=payload, method=method)
       
     def search_ents(self, query):
-        '''
+        """
         Get the entities in each document associated with a given query
 
         :param query: dict; e.g., {'material': ['GaN', '-InN']), 'application': ['LED']}
         :return: list of dicts; each dict represents a document and contains the extracted entities
-        '''
-        method = 'POST'
-        sub_url = '/ent_search'
+        """
+
+        method = "POST"
+        sub_url = "/ent_search"
         payload = query
 
         return self._make_request(sub_url, payload=payload, method=method)
 
     def get_summary(self, query):
-        '''
+        """
         Get a summary of the entities associated with a given query
 
         :param query: dict; e.g., {'material': ['GaN', '-InN']), 'application': ['LED']}
         :return: dict; a summary dict with keys for each entity type
-        '''
-        method = 'POST'
-        sub_url = '/ent_search/summary'
+        """
+
+        method = "POST"
+        sub_url = "/ent_search/summary"
         payload = query
 
         return self._make_request(sub_url, payload=payload, method=method)
 
     def get_similar_materials(self, material):
+        """
+        Finds the most similar compositions in the corpus.
+
+        :param material: string; a chemical composition
+        :return: list; the most similar compositions
+        """
         method = "GET"
         sub_url = '/materials/similar/{}'.format(material)
         return self._make_request(sub_url, method=method)
+
+    def get_ner_tags(self, docs, return_type="iob"):
+        """
+        Performs Named Entity Recognition.
+
+        :param docs: list; a list of documents; each document is represented as a single string
+        :param return_type: string; output format, can be "iob", "concatenated", or "normalized"
+        :return: list; tagged documents
+        """
+
+        method = "POST"
+        sub_url = "/ner"
+        payload = {
+            "docs": docs,
+            "return_type": return_type
+        }
+        return self._make_request(sub_url, payload=payload, method=method)
 
 
 class MatScholarRestError(Exception):
@@ -225,5 +250,3 @@ class MatScholarRestError(Exception):
     Raised when the query has problems, e.g., bad query format.
     """
     pass
-
-
