@@ -224,4 +224,21 @@ class NERTest(unittest.TestCase):
         self.assertEqual(tagged_docs[0][0][2][1], "MAT")
         self.assertTrue(isinstance(tagged_docs[0][0][2][0], list))
 
+class MaterialSearchEntsTest(unittest.TestCase):
+
+    rester = Rester()
+    TEST_QUERY = {
+        "entities": ["ferroelectric"],
+        "elements": ["O", "-Pb"],
+        "cutoff": None
+    }
+
+    def test_materials_search(self):
+        result = self.rester.materials_search_ents(**self.TEST_QUERY)
+        self.assertEqual(result[0][0], "BaO3Ti")
+        self.assertTrue(not any("Pb" in mat for mat, _, _ in result))
+        self.assertTrue(all("O" in mat for mat, _, _ in result))
+
+
+
 
