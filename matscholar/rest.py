@@ -47,7 +47,7 @@ class Rester(object):
 
     def __init__(self, api_key=None, endpoint=None):
         self.api_key = api_key if api_key else environ['MATERIALS_SCHOLAR_API_KEY']
-        self.preamble = endpoint if endpoint else "http://0.0.0.0:8080" #environ['MATERIALS_SCHOLAR_ENDPOINT']
+        self.preamble = endpoint if endpoint else environ['MATERIALS_SCHOLAR_ENDPOINT']
         self.session = requests.Session()
         self.session.headers = {"x-api-key": self.api_key}
 
@@ -226,7 +226,7 @@ class Rester(object):
         sub_url = '/materials/similar/{}'.format(material)
         return self._make_request(sub_url, method=method)
 
-    def get_ner_tags(self, docs, return_type="iob"):
+    def get_ner_tags(self, docs, return_type="concatenated"):
         """
         Performs Named Entity Recognition.
 
@@ -240,6 +240,30 @@ class Rester(object):
         payload = {
             "docs": docs,
             "return_type": return_type
+        }
+        return self._make_request(sub_url, payload=payload, method=method)
+
+    def materials_search_ents(self, entities, elements, cutoff=None):
+        """
+        Finds materials that co-occur with specified entities. The returned materials can be screened
+        by specifying elements that must be included/excluded from the stoichiometry.
+
+        :param entities: list of strings; each string is a property or application
+        :param elements: list of strings; each string is a chemical element. Materials
+        will only be returned if they contain these elements; the opposite can also be
+        achieved - materials can be removed from the returned list by placing a negative
+        sign in from of the element, e.g., "-Ti"
+        :param cutoff: int or None; if int, specifies the number of materials to
+        return; if None, returns all materials
+        :return: list; a list of chemical compositions
+        """
+
+        method = "POST"
+        sub_url = "/search/material_search"
+        payload = {
+            "entities": entities,
+            "elements": elements,
+            "cutoff": cutoff
         }
         return self._make_request(sub_url, payload=payload, method=method)
 
