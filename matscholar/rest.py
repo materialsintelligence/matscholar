@@ -267,6 +267,27 @@ class Rester(object):
         }
         return self._make_request(sub_url, payload=payload, method=method)
 
+    def search_text_with_ents(self, text, filters, cutoff=None):
+        """
+        Search abstracts by text with filters for entities
+
+        :param text: string; text to search
+        :param filters: dict; e.g., {'material': ['GaN', '-InN']), 'application': ['LED']}
+        :param cutoff: int or None; if int, specifies the number of matches to
+        return; if None, returns all matches
+        :return: list; a list of chemical compositions
+        """
+
+        method = "POST"
+        sub_url = "/search/"
+        query = {"query": filters, "limit": cutoff}
+        query['query']['text'] = text
+        payload = {
+            "query": query,
+            "cutoff": cutoff
+        }
+        return self._make_request(sub_url, payload=payload, method=method)
+
 
 class MatScholarRestError(Exception):
     """
