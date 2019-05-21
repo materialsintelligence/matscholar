@@ -66,6 +66,7 @@ class Rester(object):
     def _make_request(self, sub_url, payload=None, method="GET"):
         response = None
         url = self.preamble + sub_url
+        print(url)
         try:
             if method == "POST":
                 response = self.session.post(url, json=payload, verify=True)
