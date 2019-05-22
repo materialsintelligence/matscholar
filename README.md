@@ -65,6 +65,7 @@ This will return a list of dictionaries containing the raw-text for each abstrac
 associated metadata.
 
 **Searching entities**
+
 We have extracted materials-science named entities form nearly 3.5 million materials science
 absracts. Details on how this was performed can be found here: Reference coming soon...
 
@@ -101,6 +102,7 @@ The above search will find all materials that that do not contain lead. The resu
 element containing a list of [material, co-occurence counts, co-occurrence dois].
  
 **Word embeddings**
+
 Materials science word embeddings trained using word2vec; details on how the embeddings were trained,
 and their application in materials science discover can be found here: Tshitoyan et al., Nature, (accepted,
 reference coming soon).
@@ -126,6 +128,7 @@ This will return the 1000 closest words to photovoltaics. The result will be a d
 the close words and their cosine similarity to the input word. 
 
 **Named Entity Recognition**
+
 In addition to the pre-processed entities present in our corpus, users can performed Named Entity 
 Recognition on any raw materials science text. The details of the model can be found here: 
 
@@ -143,10 +146,12 @@ entities with their most frequently occurring synonym. A  list of tagged documen
 Each doc is a list of sentences; each sentence is a list of (word, tag) pairs.
 
 ## Citation
+
 If you use any of the API functionality in your research, please consider citing the following papers
 where relevent:
 
 [1] Tshitoyan et al., Nature (accepted)
+
 [2] Weston et al., coming soon
 
 
