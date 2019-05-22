@@ -47,7 +47,7 @@ class Rester(object):
 
     def __init__(self, api_key=None, endpoint=None):
         self.api_key = api_key if api_key else environ['MATERIALS_SCHOLAR_API_KEY']
-        self.preamble = endpoint if endpoint else environ['MATERIALS_SCHOLAR_ENDPOINT']
+        self.preamble = endpoint if endpoint else "http://0.0.0.0:8080" #environ['MATERIALS_SCHOLAR_ENDPOINT']
         self.session = requests.Session()
         self.session.headers = {"x-api-key": self.api_key}
 
@@ -285,7 +285,6 @@ class Rester(object):
     def search_text_with_ents(self, text, filters, cutoff=None):
         """
         Search abstracts by text with filters for entities
-
         :param text: string; text to search
         :param filters: dict; e.g., {'material': ['GaN', '-InN']), 'application': ['LED']}
         :param cutoff: int or None; if int, specifies the number of matches to
@@ -300,7 +299,7 @@ class Rester(object):
             "query": filters,
             "limit": cutoff
         }
-        
+
         return self._make_request(sub_url, payload=payload, method=method)
 
 
