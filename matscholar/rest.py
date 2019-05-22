@@ -294,13 +294,13 @@ class Rester(object):
         """
 
         method = "POST"
-        sub_url = "/search/"
-        query = {"query": filters, "limit": cutoff}
-        query['query']['text'] = text
+        sub_url = "/search"
+        filters['text'] = text
         payload = {
-            "query": query,
-            "cutoff": cutoff
+            "query": filters,
+            "limit": cutoff
         }
+        
         return self._make_request(sub_url, payload=payload, method=method)
 
 
