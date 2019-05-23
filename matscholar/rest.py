@@ -47,7 +47,7 @@ class Rester(object):
 
     def __init__(self, api_key=None, endpoint=None):
         self.api_key = api_key if api_key else environ['MATERIALS_SCHOLAR_API_KEY']
-        self.preamble = endpoint if endpoint else "http://0.0.0.0:8080" #environ['MATERIALS_SCHOLAR_ENDPOINT']
+        self.preamble = endpoint if endpoint else environ['MATERIALS_SCHOLAR_ENDPOINT']
         self.session = requests.Session()
         self.session.headers = {"x-api-key": self.api_key}
 
