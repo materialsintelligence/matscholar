@@ -56,9 +56,14 @@ descriptor, characterization, synthesis, phase.
 To get the raw text of abstracts matching a given query:
 
 ```python
+# text match for "solid oxide fuel cells"
 example_text = "solid oxide fuel cells"
+
+# entity filters: include documents mentioning BaZrO3 and nanoparticles; 
+# exclude documents mentioning thin films
 example_entities = {"material": ["BaZrO3"], "descriptor": ["nanoparticle", "-thin film"]}
-docs = rester.search_text_with_ents(text=example_entities, filters=example_entities)
+
+docs = rester.search_text_with_ents(text=example_text, filters=example_entities)
 ```
 
 This will return a list of dictionaries containing the raw-text for each abstracts along with 
