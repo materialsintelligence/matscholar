@@ -113,7 +113,7 @@ and their application in materials science discovery can be found in Ref. [2].
 
 To get the word embedding for a given word,
 ```python
-embeddings = rester.get_embeddings("photovoltaics")
+embedding = rester.get_embedding("photovoltaics")
 ```
 
 This will return a dict containing the embedding. The word embedding will be a 200-dimensional array.
