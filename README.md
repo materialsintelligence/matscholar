@@ -63,7 +63,7 @@ example_text = "solid oxide fuel cells"
 # exclude documents mentioning thin films
 example_entities = {"material": ["BaZrO3"], "descriptor": ["nanoparticle", "-thin film"]}
 
-docs = rester.search_text_with_ents(text=example_text, filters=example_entities)
+docs = rester.search_documents(text=example_text, filters=example_entities)
 ```
 
 This will return a list of dictionaries containing the raw-text for each abstracts along with 
@@ -75,32 +75,32 @@ We have extracted materials-science named entities from nearly 3.5 million mater
 absracts. Details on how this was performed can be found in Ref. [1].
 
 The extracted named entities for each document associated with a query are returned by the 
-search_ents method. This method takes as input a dictionary with entity types as keys and a list of entities
+search_entities method. This method takes as input a dictionary with entity types as keys and a list of entities
  as values. For example, to find all of the entities that co-occur with the material
 "GaN":
 
 ```python
-docs = rester.search_ents(query={"material": ["GaN"]})
+docs = rester.search_entities(query={"material": ["GaN"]})
 ```
 
 This wil return a list of dictionaries representing documents matching the query; each dict will contain 
 the DOI as well as each unique entity found in the corresponding abstract.
 
-A summary of the entities associated with a query can be generated using the get_summary method. To get 
+A summary of the entities associated with a query can be generated using the search_entities_summary method. To get 
 statistics for entities co-occuring with GaN,
 
 ```python
-summary = rester.get_summary(query={"material": ["GaN"]})
+summary = rester.search_entities_summary(query={"material": ["GaN"]})
 ```
  This will return a dictionary with entity types as keys; the values will be a list of the top entities
  that occur in documents matching the query, each item in the list will be [entity, document count, fraction].
  
-To perform a fast literature review, the materials_search_ents method may be used. For a chosen application, 
+To perform a fast literature review, the search_materials_by_entities method may be used. For a chosen application, 
 this will return a list of all materials that co-occur with that application in our corpus. For example,
 to see which materials co-occur with the word thermoelectric in a document,
 
 ```python
-mat_list = rester.materials_search_ents(["thermoelectric"], elements=["-Pb"], cutoff=None)
+mat_list = rester.search_materials_by_entities(["thermoelectric"], elements=["-Pb"], cutoff=None)
 ```
 
 The above search will find all materials co-occurring with thermoelectric that do not contain lead. 
@@ -118,14 +118,14 @@ embedding = rester.get_embedding("photovoltaics")
 
 This will return a dict containing the embedding. The word embedding will be a 200-dimensional array.
 
-The rester also has a close_words method (based on cosine similarity of embeddings) which can be used to 
+The rester also has a get_close_words method (based on cosine similarity of embeddings) which can be used to 
 explore the semantic similarity of materials science terms; this approach can be used discover materials
 for a new application (as outlined in the reference above), 
 
 To find words with a similar embedding to photovolatic:
 
 ```python
-close_words = rester.close_words("photovoltaics", top_k=1000)
+close_words = rester.get_close_words("photovoltaics", top_k=1000)
 ```
 
 This will return the 1000 closest words to photovoltaics. The result will be a dictionary containing 
@@ -142,7 +142,7 @@ The input should be a list of documents with the text represented as a string:
 doc_1 = "The bands gap of TiO2 is 3.2 eV. This was measured via photoluminescence"
 doc_2 = "We deposit GaN thin films using MOCVD"
 docs = [doc_1, doc_2] 
-tagged_docs = rester.get_ner_tags(docs, return_type="concatenated")
+tagged_docs = rester.perform_ner(docs, return_type="concatenated")
 ```
 
 The arguement return_type may be set to iob, concatenated, or normalized. The latter will replace
