@@ -89,7 +89,7 @@ class Rester(object):
                 if hasattr(response, "content") else str(ex)
             raise MatScholarRestError(msg)
 
-    def materials_search(self, positive, negative=None, ignore_missing=True, top_k=10):
+    def search_materials(self, positive, negative=None, ignore_missing=True, top_k=10):
         """
         Given input strings or lists of positive and negative words / phrases, returns a ranked list of materials with
         corresponding scores and numbers of mentions
@@ -112,7 +112,7 @@ class Rester(object):
 
         return self._make_request(sub_url, payload=payload, method=method)
 
-    def close_words(self, positive, negative=None, ignore_missing=True, top_k=10):
+    def get_close_words(self, positive, negative=None, ignore_missing=True, top_k=10):
         """
         Given input strings or lists of positive and negative words / phrases, returns a list of most similar words /
         phrases according to cosine similarity
@@ -188,7 +188,7 @@ class Rester(object):
 
         return self._make_request(sub_url, payload=payload, method=method)
       
-    def search_ents(self, query):
+    def search_entities(self, query):
         """
         Get the entities in each document associated with a given query
 
@@ -202,7 +202,7 @@ class Rester(object):
 
         return self._make_request(sub_url, payload=payload, method=method)
 
-    def get_journals(self, query):
+    def get_close_journals(self, query):
         '''
 
         :param query: string: a paragraph
@@ -216,7 +216,7 @@ class Rester(object):
         return self._make_request(sub_url, payload=payload, method=method)
 
 
-    def get_summary(self, query):
+    def search_entities_summary(self, query):
         """
         Get a summary of the entities associated with a given query
 
@@ -230,7 +230,7 @@ class Rester(object):
 
         return self._make_request(sub_url, payload=payload, method=method)
 
-    def get_similar_materials(self, material):
+    def get_close_materials(self, material):
         """
         Finds the most similar compositions in the corpus.
 
@@ -241,7 +241,7 @@ class Rester(object):
         sub_url = '/materials/similar/{}'.format(material)
         return self._make_request(sub_url, method=method)
 
-    def get_ner_tags(self, docs, return_type="concatenated"):
+    def perform_ner(self, docs, return_type="concatenated"):
         """
         Performs Named Entity Recognition.
 
@@ -258,7 +258,7 @@ class Rester(object):
         }
         return self._make_request(sub_url, payload=payload, method=method)
 
-    def materials_search_ents(self, entities, elements, cutoff=None):
+    def search_materials_by_entities(self, entities, elements, cutoff=None):
         """
         Finds materials that co-occur with specified entities. The returned materials can be screened
         by specifying elements that must be included/excluded from the stoichiometry.
@@ -282,7 +282,7 @@ class Rester(object):
         }
         return self._make_request(sub_url, payload=payload, method=method)
 
-    def search_text_with_ents(self, text, filters, cutoff=None):
+    def search_documents(self, text, filters, cutoff=None):
         """
         Search abstracts by text with filters for entities
         :param text: string; text to search
