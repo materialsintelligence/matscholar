@@ -7,9 +7,9 @@ import numpy as np
 class EmbeddingEngineTest(unittest.TestCase):
     r = Rester()
 
-    def test_materials_search(self):
+    def test_search_materials(self):
 
-        top_thermoelectrics = self.r.materials_search("thermoelectric", top_k=10)
+        top_thermoelectrics = self.r.search_materials("thermoelectric", top_k=10)
 
         self.assertListEqual(top_thermoelectrics["counts"], [2452, 9, 2598, 13, 5, 9, 831, 167, 8, 390])
         self.assertListEqual(top_thermoelectrics["materials"], ['Bi2Te3', 'MgAgSb', 'PbTe', 'PbSe0.5Te0.5',
@@ -63,7 +63,7 @@ class EmbeddingEngineTest(unittest.TestCase):
                 negatives,
                 top_ks,
                 ignore_missing,
-                close_words,
+                get_close_words,
                 scores,
                 processed_positives,
                 processed_negatives):
@@ -174,12 +174,12 @@ class EntSearchTest(unittest.TestCase):
 
     def test_ent_search(self):
 
-        result = self.rester.search_ents(self.test_query)
+        result = self.rester.search_entities(self.test_query)
         self.assertEqual(len(result), 1126)
         self.assertTrue(all(key in result[0].keys() for key in self.KEYS))
 
     def test_summary(self):
-        result = self.rester.get_summary(self.test_query)
+        result = self.rester.search_entities_summary(self.test_query)
         self.assertEqual(result['MAT'][0][1], 1126)
         subkeys = [key for key in self.KEYS if key != 'doi']
         self.assertTrue(all(key in result for key in subkeys))
@@ -190,7 +190,7 @@ class SimilarMaterialsTest(unittest.TestCase):
 
     def test_similar_materials(self):
         material = 'LiCoO2'
-        result = self.rester.get_similar_materials(material)
+        result = self.rester.get_close_materials(material)
         self.assertEqual(len(result), 10)
         similar_mats = ['CoLi2NiO4', 'Co3Li10Ni7O20', 'CoLi4Ni3O8', 'CoLi3MnO5', 'CoLi2O4Si',
                         'FeLiO2', 'CoLi3MnNiO6', 'CoLi10Ni9O20', 'CoLiMnO4', 'Fe2Li3O4P']
@@ -203,14 +203,14 @@ class NERTest(unittest.TestCase):
             "The lattice constant of ZnO is 3.8 A. This was measured using XRD."]
 
     def test_iob(self):
-        tagged_docs = self.rester.get_ner_tags(self.TEST_DOCS, return_type="iob")
+        tagged_docs = self.rester.perform_ner(self.TEST_DOCS, return_type="iob")
         print(tagged_docs)
         self.assertEqual(len(tagged_docs), 2)
         self.assertEqual(len(tagged_docs[0]), 2)
         self.assertEqual(tagged_docs[0][0][2][1], "B-MAT")
 
     def test_concatenated(self):
-        tagged_docs = self.rester.get_ner_tags(self.TEST_DOCS, return_type="concatenated")
+        tagged_docs = self.rester.perform_ner(self.TEST_DOCS, return_type="concatenated")
         self.assertEqual(len(tagged_docs), 2)
         self.assertEqual(len(tagged_docs[0]), 2)
         self.assertEqual(tagged_docs[0][0][2][1], "MAT")
@@ -233,8 +233,8 @@ class MaterialSearchEntsTest(unittest.TestCase):
         "cutoff": None
     }
 
-    def test_materials_search(self):
-        result = self.rester.materials_search_ents(**self.TEST_QUERY)
+    def test_search_materials(self):
+        result = self.rester.search_materials_by_entities(**self.TEST_QUERY)
         self.assertEqual(result[0][0], "BaO3Ti")
         self.assertTrue(not any("Pb" in mat for mat, _, _ in result))
         self.assertTrue(all("O" in mat for mat, _, _ in result))
