@@ -66,7 +66,6 @@ class Rester(object):
     def _make_request(self, sub_url, payload=None, method="GET"):
         response = None
         url = self.preamble + sub_url
-        print(url)
         try:
             if method == "POST":
                 response = self.session.post(url, json=payload, verify=True)
@@ -192,7 +191,7 @@ class Rester(object):
         """
         Get the entities in each document associated with a given query
 
-        :param query: dict; e.g., {'material': ['GaN', '-InN']), 'application': ['LED']}
+        :param query: dict; e.g., {'material': ['GaN', '-InN'], 'application': ['LED']}
         :return: list of dicts; each dict represents a document and contains the extracted entities
         """
 
@@ -220,7 +219,7 @@ class Rester(object):
         """
         Get a summary of the entities associated with a given query
 
-        :param query: dict; e.g., {'material': ['GaN', '-InN']), 'application': ['LED']}
+        :param query: dict; e.g., {'material': ['GaN', '-InN'], 'application': ['LED']}
         :return: dict; a summary dict with keys for each entity type
         """
 
@@ -282,11 +281,11 @@ class Rester(object):
         }
         return self._make_request(sub_url, payload=payload, method=method)
 
-    def search_text_with_ents(self, text, filters, cutoff=None):
+    def search_text_with_ents(self, text, filters, cutoff=1000):
         """
         Search abstracts by text with filters for entities
         :param text: string; text to search
-        :param filters: dict; e.g., {'material': ['GaN', '-InN']), 'application': ['LED']}
+        :param filters: dict; e.g., {'material': ['GaN', '-InN'], 'application': ['LED']}
         :param cutoff: int or None; if int, specifies the number of matches to
         return; if None, returns all matches
         :return: list; a list of chemical compositions
