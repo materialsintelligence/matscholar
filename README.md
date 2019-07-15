@@ -8,7 +8,8 @@ This library provides a Python interface for interacting with the Materials Scho
 basic NLP tasks on scientific text, and example notebooks on using these tools for materials 
 discovery and design.
 
-Documentation for the API can be found in this readme, as well as in the jupyter notebook: docs/demo.ipynb.
+Documentation for the API can be found in this readme, as well as in the jupyter notebook: docs/demo.ipynb. If
+the notebook fails to render on github, paste the link into nbviewer: https://nbviewer.jupyter.org.
 
 ## Setup
 
@@ -155,9 +156,9 @@ Each doc is a list of sentences; each sentence is a list of (word, tag) pairs.
 If you use any of the API functionality in your research, please consider citing the following papers
 where relevent:
 
-[1] Weston et al., coming soon
+[1] L. Weston et al., Submitted to J. Chem. Inf. Model., https://doi.org/10.26434/chemrxiv.8226068.v1
 
-[2] Tshitoyan et al., Nature (accepted)
+[2] V. Tshitoyan et al., Nature 571, 95 (2019).
 
 
 ## Contributors
