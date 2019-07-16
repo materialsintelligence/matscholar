@@ -2,7 +2,7 @@ pyyaml
 requests
 pytest
 numpy
-unidecode
+unidecode==1.0.23
 regex
 monty
 pymatgen
