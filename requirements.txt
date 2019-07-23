@@ -1,6 +1,7 @@
 pyyaml
 requests
 pytest
+tqdm
 numpy
 unidecode==1.0.23
 regex
@@ -9,3 +10,6 @@ pymatgen
 gensim
 chemdataextractor
 pandas
+pybliometrics==2.1.3
+pymongo
+prompt_toolkit
