@@ -149,8 +149,9 @@ class ScopusCollector:
             entries (list:dict): list of entries returned from pybliometrics.ScopusSearch
 
         """
-
         new_entries = []
+        if entries is None:
+            return new_entries
         for result in entries:
             date = datetime.datetime.now().isoformat()
             try:
@@ -178,7 +179,6 @@ class ScopusCollector:
                                 "error": str(e),
                                 "pulled_on": date,
                                 "pulled_by": self.full_name})
-
         return new_entries
 
 
@@ -244,7 +244,7 @@ class ScopusCollector:
             for entry in tqdm(new_entries):
                 try:
                     build.replace_one({"eid": entry["entry"]["eid"]}, entry, upsert=True)
-                except Error as e:
+                except Exception as e:
                     build.replace_one({"eid": entry["entry"]["eid"]}, {"error":str(e)}, upsert=True)
             # Mark block as completed in log
             date = datetime.datetime.now().isoformat()
