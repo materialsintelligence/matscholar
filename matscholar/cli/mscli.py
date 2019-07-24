@@ -5,7 +5,7 @@
 from __future__ import print_function, unicode_literals
 
 import click
-from PyInquirer import prompt
+from questionary import prompt
 from matscholar.cli.mscli_config import set_config
 from matscholar.collect import ScopusCollector
 
