@@ -5,7 +5,6 @@
 from __future__ import print_function, unicode_literals
 
 import click
-from questionary import prompt
 from matscholar.cli.mscli_config import set_config
 from matscholar.collect import ScopusCollector
 
@@ -26,32 +25,34 @@ def configure():
         {
             'type': 'input',
             'name': 'MATSCHOLAR_NAME',
-            'message': 'Whate is your full name?',
+            'message': 'What is your full name? ',
         },
         {
             'type': 'input',
             'name': 'MATSCHOLAR_TEXT_MINING_KEY',
             'message': 'Enter your Scopus API text mining key '
-                       '(obtained at https://dev.elsevier.com/apikey/manage ) ',
+                       '(obtained at https://dev.elsevier.com/apikey/manage ) : ',
         },
         {
             'type': 'input',
             'name': 'MATSCHOLAR_HOST',
-            'message': 'Enter the hostname of the Matscholar DB',
+            'message': 'Enter the hostname of the Matscholar DB: ',
         },
         {
             'type': 'input',
             'name': 'MATSCHOLAR_USER',
-            'message': 'Enter your Matscholar username',
+            'message': 'Enter your Matscholar username: ',
         },
         {
             'type': 'password',
             'name': 'MATSCHOLAR_PASSWORD',
-            'message': 'Enter your Matscholar password',
+            'message': 'Enter your Matscholar password: ',
         },
     ]
+    answers = {}
+    for question in questions:
+        answers[question["name"]] = input(question["message"])
 
-    answers = prompt(questions)
     set_config(answers)
 
 @click.command("contribute")
