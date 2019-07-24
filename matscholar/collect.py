@@ -237,7 +237,7 @@ class ScopusCollector:
                            {"$set": {"num_articles": num_articles, "num_skipped":num_skipped}})
 
             # Insert entries into Matstract database
-            print("Inserting entries into Matscholar database...")
+            print("Inserting {} entries into Matscholar database...".format(len(new_entries)))
             if len(new_entries)>0:
                 build.insert_many(new_entries)
 
