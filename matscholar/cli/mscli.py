@@ -7,6 +7,8 @@ from __future__ import print_function, unicode_literals
 import click
 from matscholar.cli.mscli_config import set_config
 from matscholar.collect import ScopusCollector
+from tabulate import tabulate
+from operator import itemgetter
 
 @click.group()
 def cli():
@@ -65,8 +67,18 @@ def collect(count):
     collector = ScopusCollector()
     collector.collect(num_blocks=count)
 
+@click.command("scoreboard")
+def scoreboard():
+    """See how you rank against the Matscholar contributors.
+    """
+    collector = ScopusCollector()
+    scores = collector.db.build.aggregate([{"$group": {"_id": '$pulled_by', "count": {"$sum": 1}}}])
+    print(tabulate(sorted([[e["_id"], e["count"]] for e in scores], key=itemgetter(1), reverse=True),
+                   headers=['Name', 'Abstracts Contributed']))
+
 cli.add_command(configure)
 cli.add_command(collect)
+cli.add_command(scoreboard)
 
 def main():
     cli()
