@@ -34,7 +34,8 @@ def clean_text(text):
 
 class ScopusCollector:
 
-    def __init__(self, full_name=None, api_key=None, matscholar_user=None, matscholar_password=None):
+    def __init__(self, full_name=None, api_key=None, matscholar_host=None,
+                 matscholar_user=None, matscholar_password=None):
         """
         A class to conveniently interface with the Scopus API for collection of
         abstracts.
@@ -72,6 +73,11 @@ class ScopusCollector:
         else:
             self.api_key = SETTINGS.get("MATSCHOLAR_TEXT_MINING_KEY", None)
 
+        if matscholar_host is not None:
+            self.matscholar_host = matscholar_host
+        else:
+            self.matscholar_host = SETTINGS.get("MATSCHOLAR_HOST", None)
+
         if matscholar_user is not None:
             self.matscholar_user = matscholar_user
         else:
@@ -83,14 +89,13 @@ class ScopusCollector:
             self.matscholar_password = SETTINGS.get("MATSCHOLAR_PASSWORD", None)
 
         try:
-            assert(None not in [self.full_name, self.api_key, self.matscholar_password, matscholar_user])
+            assert(None not in [self.full_name, self.api_key, self.matscholar_password, self.matscholar_user])
         except AssertionError as e:
             warnings.warn("Matscholar settings not configured. Please run `mscli configure` or "
                           "supply credentials as input arguments.")
             raise(e)
-        user = self.matscholar_user
-        uri = "mongodb+srv://{}:{}@{}".format(self.matscholar_user, self.matscholar_password, matscholar_host)
-        self.client = MongoClient(uri=uri, connect=False)
+        uri = "mongodb+srv://{}:{}@{}".format(self.matscholar_user, self.matscholar_password, self.matscholar_host)
+        self.client = MongoClient(uri, connect=False)
         self.db = self.client["matscholar_staging"]
 
 
@@ -109,7 +114,7 @@ class ScopusCollector:
                 The content of the file, which needs to be serialized.
 
         Raises:
-            (HTTPError) If the status of the response is not ok.
+            (HTTPError) If the status of the response is not "ok".
 
         """
 
@@ -135,61 +140,62 @@ class ScopusCollector:
                             "full access to Scopus content.")
 
 
-    #TODO: Make this a Matscholar API endpoint
-    def retrieve_block_dois(self, issn, year):
-        print("Retrieving block...")
-        pass
 
-
-    def process_block(self, issn, year, try_abstract_retrieval_api=False):
+    def process_block(self, entries):
         """ Collects abstracts from Scopus using the Scopus Search API (and optionally the Abstract Retrieval API)
         and inserts them into the Matscholar DB.
 
-        Raises:
-            HTTPError: If user is not connected to network with full-text subscriber access to Elsevier content.
+        Args:
+            entries (list:dict): list of entries returned from pybliometrics.ScopusSearch
 
         """
-        S = ScopusSearch("ISSN({}) AND PUBYEAR IS {}".format(issn, year))
-        entries = []
-        for result in S.results:
+
+        new_entries = []
+        for result in entries:
             date = datetime.datetime.now().isoformat()
             try:
                 if result.description is None:
-                    entries.append({"entry": result._asdict(),
+                    new_entries.append({"entry": result._asdict(),
                                     "completed": False,
                                     "error": "No Abstract!",
                                     "pulled_on": date,
                                     "pulled_by": self.full_name})
+                elif result.doi is None:
+                    new_entries.append({"entry": result._asdict(),
+                                    "completed": False,
+                                    "error": "No DOI!",
+                                    "pulled_on": date,
+                                    "pulled_by": self.full_name})
                 else:
-                    entries.append({"entry": result._asdict(),
+                    new_entries.append({"entry": result._asdict(),
                                     "completed": True,
                                     "pulled_on": date,
                                     "pulled_by": self.full_name})
 
             except requests.HTTPError as e:
-                entries.append({"entry": result._asdict(),
+                new_entries.append({"entry": result._asdict(),
                                 "completed": False,
                                 "error": str(e),
                                 "pulled_on": date,
                                 "pulled_by": self.full_name})
 
-        return entries
+        return new_entries
 
-    def contribute(self, max_block_size=1000, num_blocks=10):
+
+    def collect(self, max_block_size=100, num_blocks=1):
         """
         Gets a incomplete year/journal combination from elsevier_log, queries for the corresponding
         dois, and downloads the corresponding xmls for each to the elsevier collection.
 
         Args:
-            max_block_size ((:obj:`int`, optional)): maximum number of articles in block (~1s/article). Defaults to 100.
-            num_blocks ((:obj:`int`, optional)): maximum number of blocks to run in session. Defaults to 1.
+            max_block_size (int): maximum number of articles in block (~10 articles/s). Defaults to 100.
+            num_blocks (int): maximum number of blocks to run in session. Defaults to 1.
         """
 
         log = self.db.build_log
         build = self.db.build
 
         for i in range(num_blocks):
-            time.sleep(3)  # to make sure we don't send more than 6 request / second on 16 cores (3 > 16/6)
             # Verify access at start of each block to detect dropped VPN sessions.
             self.verify_access()
 
@@ -208,7 +214,9 @@ class ScopusCollector:
             target = available_blocks[0]
             date = datetime.datetime.now().isoformat()
             log.update_one({"_id": target["_id"]},
-                           {"$set": {"status": "in progress", "updated_by": user, "updated_on": date}})
+                           {"$set": {"status": "in progress",
+                                     "updated_by": self.full_name,
+                                     "updated_on": date}})
 
             # Collect scopus for block
             if "journal" in target:
@@ -219,21 +227,27 @@ class ScopusCollector:
                 print("Collecting entries for {}, {} (Block ID {})...".format(target.get("issn"),
                                                                               target.get("year"),
                                                                               target.get("_id")))
-            dois = find_articles(year=target["year"], issn=target["issn"], get_all=True, apikey=apikey)
-            new_entries = collect_entries_by_doi_search(dois, user, apikey=apikey)
+
+            S = ScopusSearch("ISSN({}) AND PUBYEAR IS {}".format(target.get("issn"), target.get("year")),
+                             max_entries=None, cursor=True)
+
+            new_entries = self.process_block(S.results)
 
             # Update log with number of articles for block
             num_articles = len(new_entries)
+            num_skipped = len(S.results)-len(new_entries)
             log.update_one({"_id": target["_id"]},
-                           {"$set": {"num_articles": num_articles}})
+                           {"$set": {"num_articles": num_articles, "num_skipped":num_skipped}})
 
             # Insert entries into Matstract database
-            print("Inserting entries into Matstract database...")
+            print("Inserting entries into Matscholar database...")
             for entry in tqdm(new_entries):
-                build.replace_one({"doi": entry["doi"]}, entry, upsert=True)
-
+                try:
+                    build.replace_one({"eid": entry["entry"]["eid"]}, entry, upsert=True)
+                except Error as e:
+                    build.replace_one({"eid": entry["entry"]["eid"]}, {"error":str(e)}, upsert=True)
             # Mark block as completed in log
             date = datetime.datetime.now().isoformat()
             log.update_one({"_id": target["_id"]},
-                           {"$set": {"status": "complete", "completed_by": user, "completed_on": date,
-                                     "updated_by": user, "updated_on": date}})
+                           {"$set": {"status": "complete", "completed_by": self.full_name, "completed_on": date,
+                                     "updated_by": self.full_name, "updated_on": date}})
