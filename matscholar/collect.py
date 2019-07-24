@@ -238,11 +238,8 @@ class ScopusCollector:
 
             # Insert entries into Matstract database
             print("Inserting entries into Matscholar database...")
-            for entry in tqdm(new_entries):
-                try:
-                    build.replace_one({"eid": entry["entry"]["eid"]}, entry, upsert=True)
-                except Exception as e:
-                    build.replace_one({"eid": entry["entry"]["eid"]}, {"error":str(e)}, upsert=True)
+            build.insert_many(new_entries)
+
             # Mark block as completed in log
             date = datetime.datetime.now().isoformat()
             log.update_one({"_id": target["_id"]},
