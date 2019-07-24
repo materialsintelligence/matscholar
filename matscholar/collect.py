@@ -238,7 +238,8 @@ class ScopusCollector:
 
             # Insert entries into Matstract database
             print("Inserting entries into Matscholar database...")
-            build.insert_many(new_entries)
+            if len(new_entries)>0:
+                build.insert_many(new_entries)
 
             # Mark block as completed in log
             date = datetime.datetime.now().isoformat()
