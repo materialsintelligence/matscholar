@@ -13,5 +13,4 @@ pandas
 pybliometrics==2.1.3
 pymongo
 prompt_toolkit==1.0.14
-questionary
 dnspython
