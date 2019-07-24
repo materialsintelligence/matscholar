@@ -232,7 +232,7 @@ class ScopusCollector:
             new_entries = self.process_block(results)
             # Update log with number of articles for block
             num_articles = len(new_entries)
-            num_skipped = len(S.results)-len(new_entries)
+            num_skipped = len(results)-len(new_entries)
             log.update_one({"_id": target["_id"]},
                            {"$set": {"num_articles": num_articles, "num_skipped":num_skipped}})
 
