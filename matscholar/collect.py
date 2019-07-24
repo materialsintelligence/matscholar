@@ -229,7 +229,7 @@ class ScopusCollector:
             S = ScopusSearch("ISSN({}) AND PUBYEAR IS {}".format(target.get("issn"), target.get("year")),
                              max_entries=None, cursor=True)
             results = S.results if S.results is not None else []
-            new_entries = self.process_block(S.results)
+            new_entries = self.process_block(results)
             # Update log with number of articles for block
             num_articles = len(new_entries)
             num_skipped = len(S.results)-len(new_entries)
