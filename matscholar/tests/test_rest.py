@@ -224,6 +224,14 @@ class NERTest(unittest.TestCase):
         self.assertEqual(tagged_docs[0][0][2][1], "MAT")
         self.assertTrue(isinstance(tagged_docs[0][0][2][0], list))
 
+    def test_relevance(self):
+        test_docs = ["The polymer may be used in OLEDs and biosensors.",
+                     "The band gap of ZnO is 3.3 eV"]
+        preds = self.rester.classify_relevance(test_docs)
+        self.assertEqual(preds[0], 0)
+        self.assertEqual(preds[1], 1)
+
+
 class MaterialSearchEntsTest(unittest.TestCase):
 
     rester = Rester()

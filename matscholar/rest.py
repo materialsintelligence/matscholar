@@ -301,6 +301,23 @@ class Rester(object):
 
         return self._make_request(sub_url, payload=payload, method=method)
 
+    def classify_relevance(self, docs, decision_boundary=0.5):
+        """
+        Determine whether or not a document relates to inorganic material science.
+
+        :param docs: list of strings; the documents to be classified
+        :param decision_boundary: float; decision boundary for the classifier
+        :return: list; classification labels for each doc (1 or 0)
+        """
+        method = "POST"
+        sub_url = "/relevance"
+        payload = {
+            "docs": docs,
+            "decision_boundary": decision_boundary
+        }
+
+        return self._make_request(sub_url, payload=payload, method=method)
+
 
 class MatScholarRestError(Exception):
     """
@@ -308,3 +325,4 @@ class MatScholarRestError(Exception):
     Raised when the query has problems, e.g., bad query format.
     """
     pass
+
