@@ -1,4 +1,5 @@
 pyyaml
+yaml
 requests
 pytest
 tqdm
