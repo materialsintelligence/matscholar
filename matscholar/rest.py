@@ -301,6 +301,16 @@ class Rester(object):
 
         return self._make_request(sub_url, payload=payload, method=method)
 
+    def get_abstract_count(self):
+        """
+        Get the total count of abstracts in the database
+        """
+
+        method = "GET"
+        sub_url = "/abstract_count"
+
+        return self._make_request(sub_url,method=method)
+
 
 class MatScholarRestError(Exception):
     """
