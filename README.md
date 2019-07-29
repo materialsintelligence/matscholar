@@ -153,7 +153,7 @@ Each doc is a list of sentences; each sentence is a list of (word, tag) pairs.
 
 ## Citation
 
-If you use any of the API functionality in your research, please consider citing the following papers
+If you use any of the API functionality in your research, please cite the following papers
 where relevent:
 
 [1] L. Weston et al., Submitted to J. Chem. Inf. Model., https://doi.org/10.26434/chemrxiv.8226068.v1

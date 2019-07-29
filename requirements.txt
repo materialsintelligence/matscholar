@@ -1,6 +1,7 @@
 pyyaml
 requests
 pytest
+tqdm
 numpy
 unidecode==1.0.23
 regex
@@ -9,3 +10,7 @@ pymatgen
 gensim
 chemdataextractor
 pandas
+-e git://github.com/materialsintelligence/pybliometrics.git#egg=pybliometrics
+pymongo
+prompt_toolkit==1.0.14
+dnspython
