@@ -88,28 +88,52 @@ class Rester(object):
                 if hasattr(response, "content") else str(ex)
             raise MatScholarRestError(msg)
 
-    def materials_search(self, positive, negative=None, ignore_missing=True, top_k=10):
-        """
-        Given input strings or lists of positive and negative words / phrases, returns a ranked list of materials with
-        corresponding scores and numbers of mentions
-        :param positive: a string or a list of strings used as a positive search criterion
-        :param negative: a string or a list of strings used as a negative search criterion
-        :param ignore_missing: if True, ignore words missing from the embedding vocabulary, otherwise generate "guess"
-        embeddings
-        :param top_k: number of top results to return (10 by default)
-        :return: a dictionary with the following keys ["materials", "counts", "scores", "positive", "negative",
-                                                                    "original_negative", "original_positive"]
-        """
-
-        if not isinstance(positive, list):
-            positive = [positive]
-        if negative and not isinstance(negative, list):
-            negative = [negative]
-        method = "GET"
-        sub_url = '/embeddings/matsearch/{}'.format(",".join(positive))
-        payload = {'top_k': top_k, 'negative': ",".join(negative) if negative else None, 'ignore_missing': ignore_missing}
+    def __search(self,group_by,entities,text=None,elements=None,top_k=10):
+        method = "POST"
+        sub_url = "/search"
+        query = {'entities':entities,'group_by':group_by}
+        if text:
+            query['text'] = text
+        if elements:
+            query['elements'] = elements
+        payload = {
+            "query": query,
+            "limit": top_k
+        }
 
         return self._make_request(sub_url, payload=payload, method=method)
+
+    def abstracts_search(self,entities,text=None,elements=None,top_k=10):
+        """
+        Search for abstracts
+        :param entities: string or list of strings; entities to filter by
+        :param text: string; text to search
+        :param elements: string or list of strings; filter by elements in materials
+        :param top_k: int or None; if int, specifies the number of matches to
+        return; if None, returns all matches
+        :return: list; a list abstracts matching criteria
+        """
+
+        group_by = "abstracts"
+        return self.__search(group_by,entities,text,elements,top_k)
+
+    def materials_search(self,entities,text=None,elements=None,top_k=10):
+        """
+        Search for materials
+        :param entities: string or list of strings; entities to filter by
+        :param text: string; text to search
+        :param elements: string or list of strings; filter by elements in materials
+        :param top_k: int or None; if int, specifies the number of matches to
+        return; if None, returns all matches
+        :return: list; a list abstracts matching criteria
+        """
+
+        group_by = "materials"
+        return self.__search(group_by,entities,text,elements,top_k)
+
+    def entities_search(self,entities,text=None,elements=None,top_k=10):
+        group_by = "entities"
+        return self.__search(group_by,entities,text,elements,top_k)
 
     def close_words(self, positive, negative=None, ignore_missing=True, top_k=10):
         """
@@ -187,20 +211,6 @@ class Rester(object):
 
         return self._make_request(sub_url, payload=payload, method=method)
       
-    def search_ents(self, query):
-        """
-        Get the entities in each document associated with a given query
-
-        :param query: dict; e.g., {'material': ['GaN', '-InN'], 'application': ['LED']}
-        :return: list of dicts; each dict represents a document and contains the extracted entities
-        """
-
-        method = "POST"
-        sub_url = "/ent_search"
-        payload = query
-
-        return self._make_request(sub_url, payload=payload, method=method)
-
     def get_journals(self, query):
         '''
 
@@ -211,21 +221,6 @@ class Rester(object):
         method = 'POST'
         sub_url = '/journal_suggestion'
         payload = {'abstract': query}
-
-        return self._make_request(sub_url, payload=payload, method=method)
-
-
-    def get_summary(self, query):
-        """
-        Get a summary of the entities associated with a given query
-
-        :param query: dict; e.g., {'material': ['GaN', '-InN'], 'application': ['LED']}
-        :return: dict; a summary dict with keys for each entity type
-        """
-
-        method = "POST"
-        sub_url = "/ent_search/summary"
-        payload = query
 
         return self._make_request(sub_url, payload=payload, method=method)
 
@@ -255,50 +250,6 @@ class Rester(object):
             "docs": docs,
             "return_type": return_type
         }
-        return self._make_request(sub_url, payload=payload, method=method)
-
-    def materials_search_ents(self, entities, elements, cutoff=None):
-        """
-        Finds materials that co-occur with specified entities. The returned materials can be screened
-        by specifying elements that must be included/excluded from the stoichiometry.
-
-        :param entities: list of strings; each string is a property or application
-        :param elements: list of strings; each string is a chemical element. Materials
-        will only be returned if they contain these elements; the opposite can also be
-        achieved - materials can be removed from the returned list by placing a negative
-        sign in from of the element, e.g., "-Ti"
-        :param cutoff: int or None; if int, specifies the number of materials to
-        return; if None, returns all materials
-        :return: list; a list of chemical compositions
-        """
-
-        method = "POST"
-        sub_url = "/search/material_search"
-        payload = {
-            "entities": entities,
-            "elements": elements,
-            "cutoff": cutoff
-        }
-        return self._make_request(sub_url, payload=payload, method=method)
-
-    def search_text_with_ents(self, text, filters, cutoff=1000):
-        """
-        Search abstracts by text with filters for entities
-        :param text: string; text to search
-        :param filters: dict; e.g., {'material': ['GaN', '-InN'], 'application': ['LED']}
-        :param cutoff: int or None; if int, specifies the number of matches to
-        return; if None, returns all matches
-        :return: list; a list of chemical compositions
-        """
-
-        method = "POST"
-        sub_url = "/search"
-        filters['text'] = text
-        payload = {
-            "query": filters,
-            "limit": cutoff
-        }
-
         return self._make_request(sub_url, payload=payload, method=method)
 
     def get_abstract_count(self):
