@@ -38,7 +38,7 @@ If an API key has already been obtained, the rester is instantiated as follows:
 ```python
 from matscholar.rest import Rester
 
-rester = Rester(api_key="your-api-key", endpoint="api.matscholar.com")
+rester = Rester(api_key="your-api-key", endpoint="https://api.matscholar.com")
 ```
 
 To avoid passing the API key and endpoint as arguments, set the following environment variables 
