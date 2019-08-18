@@ -151,6 +151,30 @@ The arguement return_type may be set to iob, concatenated, or normalized. The la
 entities with their most frequently occurring synonym. A  list of tagged documents will be returned.
 Each doc is a list of sentences; each sentence is a list of (word, tag) pairs.
 
+## Abstract Collection Tool and the Matscholar CLI
+
+1. Clone this repo with `git pull https://github.com/materialsintelligence/matscholar`.
+2. Install matscholar’s dependencies with `pip install -r requirements.txt` in the repo directory.
+3. Install matscholar with `python setup.py install` in the repo directory.
+4. Get a text mining API key from https://dev.elsevier.com/apikey/manage
+5. Run `mscli configure` on the command line and enter the following info:
+``` 
+Name: <your full name>
+Scopus API Key: <the key you just got from Scopus>
+Matscholar Hostname: <mongodb hostname> 
+Matscholar Username: <mongodb username>
+Matscholar Password: <mongodb password> 
+```
+6. Set up a collection in your MongoDB database called "bulid_log" and fill it with entries like the following for each year/journal combination you'd like to collect from. 
+```
+{
+year: <year>
+issn: <issn>
+status: "incomplete"
+num_articles: -1
+}
+```
+7. Run `mscli contribute` to start pulling abstracts from the scopus API. Use the --count option to set the number of blocks you want to pull (they generally have fewer than 1000 abstracts)
 ## Citation
 
 If you use any of the API functionality in your research, please cite the following papers
