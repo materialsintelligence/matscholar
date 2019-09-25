@@ -19,7 +19,7 @@ def cli():
     """
     pass
 
-@click.command("configure")
+@click.command('configure')
 def configure():
     """Used to configure Matscholar configuration settings."""
 
