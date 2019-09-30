@@ -13,6 +13,8 @@ the notebook fails to render on github, paste the link into nbviewer: https://nb
 
 ## Setup
 
+For installation and usage - it doesn't work with python3.7 as there are problems with dependencies, so use python3.6
+
 We *highly* recommend using a [conda environment](https://conda.io/docs/user-guide/tasks/manage-environments.html) 
 when working with materials scholar tools.
 
