@@ -81,17 +81,17 @@ class Rester(object):
                     raise MatScholarRestError(data["error"])
 
             raise MatScholarRestError("REST query returned with error status code {}"
-                                     .format(response.status_code))
+                                      .format(response.status_code))
 
         except Exception as ex:
             msg = "{}. Content: {}".format(str(ex), response.content) \
                 if hasattr(response, "content") else str(ex)
             raise MatScholarRestError(msg)
 
-    def __search(self,group_by,entities,text=None,elements=None,top_k=10):
+    def __search(self, group_by, entities, text=None, elements=None, top_k=10):
         method = "POST"
         sub_url = "/search"
-        query = {'entities':entities,'group_by':group_by,'limit':top_k}
+        query = {'entities': entities, 'group_by': group_by, 'limit': top_k}
         if text:
             query['text'] = text
         if elements:
@@ -99,7 +99,7 @@ class Rester(object):
 
         return self._make_request(sub_url, payload=query, method=method)
 
-    def abstracts_search(self,entities,text=None,elements=None,top_k=10):
+    def abstracts_search(self, entities, text=None, elements=None, top_k=10):
         """
         Search for abstracts
         :param entities: string or list of strings; entities to filter by
@@ -111,9 +111,9 @@ class Rester(object):
         """
 
         group_by = "abstracts"
-        return self.__search(group_by,entities,text,elements,top_k)
+        return self.__search(group_by, entities, text, elements, top_k)
 
-    def materials_search(self,entities,text=None,elements=None,top_k=10):
+    def materials_search(self, entities, text=None, elements=None, top_k=10):
         """
         Search for materials
         :param entities: string or list of strings; entities to filter by
@@ -125,11 +125,11 @@ class Rester(object):
         """
 
         group_by = "materials"
-        return self.__search(group_by,entities,text,elements,top_k)
+        return self.__search(group_by, entities, text, elements, top_k)
 
-    def entities_search(self,entities,text=None,elements=None,top_k=10):
+    def entities_search(self, entities, text=None, elements=None, top_k=10):
         group_by = "entities"
-        return self.__search(group_by,entities,text,elements,top_k)
+        return self.__search(group_by, entities, text, elements, top_k)
 
     def close_words(self, positive, negative=None, ignore_missing=True, top_k=10):
         """
@@ -151,7 +151,8 @@ class Rester(object):
 
         method = "GET"
         sub_url = '/embeddings/close_words/{}'.format(",".join(positive))
-        payload = {'top_k': top_k, 'negative': ",".join(negative) if negative else None, 'ignore_missing': ignore_missing}
+        payload = {'top_k': top_k, 'negative': ",".join(
+            negative) if negative else None, 'ignore_missing': ignore_missing}
 
         return self._make_request(sub_url, payload=payload, method=method)
 
@@ -206,7 +207,7 @@ class Rester(object):
                    'dims': dims}
 
         return self._make_request(sub_url, payload=payload, method=method)
-      
+
     def get_journals(self, query):
         '''
 
@@ -248,15 +249,16 @@ class Rester(object):
         }
         return self._make_request(sub_url, payload=payload, method=method)
 
-    def get_abstract_count(self):
+    def get_db_count(self, count_type):
         """
-        Get the total count of abstracts in the database
+        Get the count of various DB objects
+        :param count_type: string, one of ["abstracts", "entities", "materials"]. Object type to count
         """
 
         method = "GET"
-        sub_url = "/abstract_count"
+        sub_url = "/count/" + count_type.strip()
 
-        return self._make_request(sub_url,method=method)
+        return self._make_request(sub_url, method=method)
 
     def classify_relevance(self, docs, decision_boundary=0.5):
         """
@@ -282,4 +284,3 @@ class MatScholarRestError(Exception):
     Raised when the query has problems, e.g., bad query format.
     """
     pass
-
