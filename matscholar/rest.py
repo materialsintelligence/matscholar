@@ -128,8 +128,30 @@ class Rester(object):
         return self.__search(group_by, entities, text, elements, top_k)
 
     def entities_search(self, entities, text=None, elements=None, top_k=10):
+
         group_by = "entities"
         return self.__search(group_by, entities, text, elements, top_k)
+
+    def dois_search(self, entities, text=None, elements=None, top_k=None):
+        """
+        Search for dois
+        :param entities: string or list of strings; entities to filter by
+        :param text: string; text to search
+        :param elements: string or list of strings; filter by elements in materials
+        :param top_k: int or None; if int, specifies the number of matches to
+        return; if None, returns all matches
+        :return: list; a list of dois matching criteria
+        """
+
+        method = "POST"
+        sub_url = "/search/dois"
+        query = {'entities': entities, 'limit': top_k}
+        if text:
+            query['text'] = text
+        if elements:
+            query['elements'] = elements
+
+        return self._make_request(sub_url, payload=query, method=method)
 
     def close_words(self, positive, negative=None, ignore_missing=True, top_k=10):
         """
@@ -208,7 +230,17 @@ class Rester(object):
 
         return self._make_request(sub_url, payload=payload, method=method)
 
-    def get_journals(self, query):
+    def get_journals(self):
+        """
+        Get a list of all distinct journals in the db
+
+        :return: list; distinct journal names
+        """
+        method = "GET"
+        sub_url = "/journals"
+        return self._make_request(sub_url, method=method)
+
+    def get_journals_suggestion(self, query):
         '''
 
         :param query: string: a paragraph
