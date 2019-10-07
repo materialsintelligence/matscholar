@@ -271,7 +271,7 @@ class Rester(object):
         """
 
         method = "GET"
-        sub_url = "/journals"
+        sub_url = "/stats/journals"
         return self._make_request(sub_url, method=method)
 
     def get_ner_tags(self, document, concatenate=True, normalize=False):
