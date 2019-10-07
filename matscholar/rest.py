@@ -66,14 +66,12 @@ class Rester(object):
     def _make_request(self, sub_url, payload=None, method="GET"):
         response = None
         url = self.preamble + sub_url
-        print(url)
         try:
             if method == "POST":
                 response = self.session.post(url, json=payload, verify=True)
             else:
                 response = self.session.get(url, params=payload, verify=True)
 
-            print(response.status_code)
             if response.status_code in [200, 400]:
                 data = json.loads(response.text)
                 if isinstance(data, dict):
