@@ -8,6 +8,7 @@ from pymongo import MongoClient
 from tqdm import tqdm
 import time
 
+
 def clean_text(text):
     """ Cleans abstract text from scopus documents.
 
@@ -22,6 +23,7 @@ def clean_text(text):
         return None
     try:
         cleaned_text = re.sub("© ([0-9])\w* The Author(s)*\.( )*", "", text)
+        cleaned_text = re.sub("© ([0-9])\w* University*\.( )*", "", cleaned_text)
         cleaned_text = re.sub("Published by Elsevier Ltd\.", "", cleaned_text)
         cleaned_text = re.sub("\n                        ", "", cleaned_text)
         cleaned_text = re.sub("\n                     ", "", cleaned_text)
@@ -30,6 +32,22 @@ def clean_text(text):
         return cleaned_text
     except:
         return None
+
+
+def validate_entry_keys(entry):
+    """Helper function to catch bad entries. Returns True if '$' is
+    not the first character in any keys in the dict (MongoDB reserves
+    $ for operators.)
+    Args:
+        entry (dict): Entry to be checked.
+
+    Returns:
+        bool
+    """
+    for key in entry.keys():
+        if key[0] == "$":
+            return False
+    return True
 
 
 class ScopusCollector:
@@ -89,15 +107,14 @@ class ScopusCollector:
             self.matscholar_password = SETTINGS.get("MATSCHOLAR_PASSWORD", None)
 
         try:
-            assert(None not in [self.full_name, self.api_key, self.matscholar_password, self.matscholar_user])
+            assert (None not in [self.full_name, self.api_key, self.matscholar_password, self.matscholar_user])
         except AssertionError as e:
             warnings.warn("Matscholar settings not configured. Please run `mscli configure` or "
                           "supply credentials as input arguments.")
-            raise(e)
+            raise (e)
         uri = "mongodb+srv://{}:{}@{}".format(self.matscholar_user, self.matscholar_password, self.matscholar_host)
         self.client = MongoClient(uri, connect=False)
         self.db = self.client["matscholar_staging"]
-
 
     def direct_download(self, url, format='xml', params=None):
         """
@@ -123,7 +140,6 @@ class ScopusCollector:
         resp.raise_for_status()
         return resp
 
-
     def verify_access(self):
         """ Confirms that the user is connected to a network with full access to Elsevier.
         i.e. the LBNL Employee Network
@@ -136,10 +152,8 @@ class ScopusCollector:
             self.direct_download("https://api.elsevier.com/content/article/doi/10.1016/j.actamat.2018.01.057?view=FULL")
         except requests.HTTPError:
             raise requests.HTTPError(" Cannot retreive full document from Elsevier API. \n \n"
-                            "Please confrim that you're connected to a network or VPN with "
-                            "full access to Scopus content.")
-
-
+                                     "Please confrim that you're connected to a network or VPN with "
+                                     "full access to Scopus content.")
 
     def process_block(self, entries):
         """ Collects abstracts from Scopus using the Scopus Search API (and optionally the Abstract Retrieval API)
@@ -152,33 +166,44 @@ class ScopusCollector:
         new_entries = []
         for result in entries:
             date = datetime.datetime.now().isoformat()
+            entry = result._asdict()
             try:
-                if result.description is None:
-                    new_entries.append({"entry": result._asdict(),
-                                    "completed": False,
-                                    "error": "No Abstract!",
-                                    "pulled_on": date,
-                                    "pulled_by": self.full_name})
+                if not validate_entry_keys(result._asdict()):
+                    new_entries.append({"entry": str(entry),
+                                        "doi": entry["doi"],
+                                        "completed": False,
+                                        "error": "One or more key starts with '$'",
+                                        "pulled_on": date,
+                                        "pulled_by": self.full_name})
+                elif result.description is None:
+                    new_entries.append({"entry": str(entry),
+                                        "doi": entry["doi"],
+                                        "completed": False,
+                                        "error": "No Abstract!",
+                                        "pulled_on": date,
+                                        "pulled_by": self.full_name})
                 elif result.doi is None:
-                    new_entries.append({"entry": result._asdict(),
-                                    "completed": False,
-                                    "error": "No DOI!",
-                                    "pulled_on": date,
-                                    "pulled_by": self.full_name})
+                    new_entries.append({"entry": str(entry),
+                                        "doi": entry["doi"],
+                                        "completed": False,
+                                        "error": "No DOI!",
+                                        "pulled_on": date,
+                                        "pulled_by": self.full_name})
                 else:
-                    new_entries.append({"entry": result._asdict(),
-                                    "completed": True,
-                                    "pulled_on": date,
-                                    "pulled_by": self.full_name})
+                    new_entries.append({"entry": str(entry),
+                                        "doi": entry["doi"],
+                                        "completed": True,
+                                        "pulled_on": date,
+                                        "pulled_by": self.full_name})
 
             except requests.HTTPError as e:
-                new_entries.append({"entry": result._asdict(),
-                                "completed": False,
-                                "error": str(e),
-                                "pulled_on": date,
-                                "pulled_by": self.full_name})
+                new_entries.append({"entry": str(entry),
+                                    "doi": entry["doi"],
+                                    "completed": False,
+                                    "error": str(e),
+                                    "pulled_on": date,
+                                    "pulled_by": self.full_name})
         return new_entries
-
 
     def collect(self, max_block_size=100, num_blocks=1):
         """
@@ -232,17 +257,22 @@ class ScopusCollector:
             new_entries = self.process_block(results)
             # Update log with number of articles for block
             num_articles = len(new_entries)
-            num_skipped = len(results)-len(new_entries)
+            num_skipped = len(results) - len(new_entries)
             log.update_one({"_id": target["_id"]},
-                           {"$set": {"num_articles": num_articles, "num_skipped":num_skipped}})
+                           {"$set": {"num_articles": num_articles, "num_skipped": num_skipped}})
 
-            # Insert entries into Matstract database
-            print("Inserting {} entries into Matscholar database...".format(len(new_entries)))
-            if len(new_entries)>0:
-                build.insert_many(new_entries)
-
-            # Mark block as completed in log
-            date = datetime.datetime.now().isoformat()
-            log.update_one({"_id": target["_id"]},
-                           {"$set": {"status": "complete", "completed_by": self.full_name, "completed_on": date,
-                                     "updated_by": self.full_name, "updated_on": date}})
+            # Insert entries into database
+            print("Inserting {} entries into Materials Scholar database...".format(len(new_entries)))
+            if len(new_entries) > 0:
+                try:
+                    build.insert_many(new_entries)
+                    # Mark block insertion as completed in log
+                    date = datetime.datetime.now().isoformat()
+                    log.update_one({"_id": target["_id"]},
+                                   {"$set": {"status": "complete", "completed_by": self.full_name, "completed_on": date,
+                                             "updated_by": self.full_name, "updated_on": date}})
+                except Exception as e:
+                    # Mark block insertion as failed in log
+                    log.update_one({"_id": target["_id"]},
+                                   {"$set": {"status": "failed", "completed_by": self.full_name, "completed_on": date,
+                                             "updated_by": self.full_name, "updated_on": date, "error": str(e)}})

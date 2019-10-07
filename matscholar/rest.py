@@ -66,22 +66,23 @@ class Rester(object):
     def _make_request(self, sub_url, payload=None, method="GET"):
         response = None
         url = self.preamble + sub_url
+        print(url)
         try:
             if method == "POST":
                 response = self.session.post(url, json=payload, verify=True)
             else:
                 response = self.session.get(url, params=payload, verify=True)
+
+            print(response.status_code)
             if response.status_code in [200, 400]:
                 data = json.loads(response.text)
-                if data["valid_response"]:
+                if isinstance(data, dict):
                     if data.get("warning"):
                         warnings.warn(data["warning"])
-                    return data["response"]
-                else:
-                    raise MatScholarRestError(data["error"])
-
-            raise MatScholarRestError("REST query returned with error status code {}"
-                                      .format(response.status_code))
+                    return data
+                return data
+            else:
+                raise MatScholarRestError(response)
 
         except Exception as ex:
             msg = "{}. Content: {}".format(str(ex), response.content) \
@@ -101,55 +102,97 @@ class Rester(object):
 
     def abstracts_search(self, entities, text=None, elements=None, top_k=10):
         """
-        Search for abstracts
-        :param entities: string or list of strings; entities to filter by
-        :param text: string; text to search
-        :param elements: string or list of strings; filter by elements in materials
-        :param top_k: int or None; if int, specifies the number of matches to
-        return; if None, returns all matches
-        :return: list; a list abstracts matching criteria
+        Search for abstracts by entities and text filters.
+
+        Args:
+
+            entities: dict of entity lists (list of str) to filter by. Keys are
+              singular snake case for each of the entity types (material,
+              property, descriptor, application, synthesis_method,
+              structure_phase_label, characterization_method)
+
+            text: english text, which gets searched on via Elasticsearch.
+
+            elements: string or list of strings; filter by elements in materials
+
+            top_k: (int or None) if int, specifies the number of matches to
+                return; if None, returns all matches.
+
+        Returns:
+            List of entries (dictionaries) with abstracts, entities, and metadata.
         """
 
-        group_by = "abstracts"
-        return self.__search(group_by, entities, text, elements, top_k)
+        method = "POST"
+        sub_url = "/entries"
+        query = {'query': {'entities': entities, 'text': text},
+                 'limit': top_k}
+
+        return self._make_request(sub_url, payload=query, method=method)
 
     def materials_search(self, entities, text=None, elements=None, top_k=10):
         """
         Search for materials
-        :param entities: string or list of strings; entities to filter by
-        :param text: string; text to search
-        :param elements: string or list of strings; filter by elements in materials
-        :param top_k: int or None; if int, specifies the number of matches to
-        return; if None, returns all matches
-        :return: list; a list abstracts matching criteria
+
+        Args:
+
+            entities: dict of entity lists (list of str) to filter by. Keys are
+              singular snake case for each of the entity types (material,
+              property, descriptor, application, synthesis_method,
+              structure_phase_label, characterization_method)
+
+            text: english text, which gets searched on via Elasticsearch.
+
+            elements: string or list of strings; filter by elements in materials
+
+            top_k: (int or None) if int, specifies the number of matches to
+                return; if None, returns all matches.
+
+        Returns:
+            List of entries (dictionaries) with abstracts, entities, and metadata.
         """
 
-        group_by = "materials"
-        return self.__search(group_by, entities, text, elements, top_k)
+        method = "POST"
+        sub_url = "/materials"
+        query = {'entities': entities, 'text': text}
+
+        return self._make_request(sub_url, payload=query, method=method)
 
     def entities_search(self, entities, text=None, elements=None, top_k=10):
 
-        group_by = "entities"
-        return self.__search(group_by, entities, text, elements, top_k)
+        method = "POST"
+        sub_url = "/entities"
+        query = {'query': {'entities': entities, 'text': text},
+                 'limit': top_k}
+
+        return self._make_request(sub_url, payload=query, method=method)
 
     def dois_search(self, entities, text=None, elements=None, top_k=None):
         """
         Search for dois
-        :param entities: string or list of strings; entities to filter by
-        :param text: string; text to search
-        :param elements: string or list of strings; filter by elements in materials
-        :param top_k: int or None; if int, specifies the number of matches to
-        return; if None, returns all matches
-        :return: list; a list of dois matching criteria
+
+        Args:
+
+            entities: dict of entity lists (list of str) to filter by. Keys are
+              singular snake case for each of the entity types (material,
+              property, descriptor, application, synthesis_method,
+              structure_phase_label, characterization_method)
+
+            text: english text, which gets searched on via Elasticsearch.
+
+            elements: string or list of strings; filter by elements in materials
+
+            top_k: (int or None) if int, specifies the number of matches to
+                return; if None, returns all matches.
+
+        Returns:
+            List of of dois matching criteria.
+
         """
 
         method = "POST"
-        sub_url = "/search/dois"
-        query = {'entities': entities, 'limit': top_k}
-        if text:
-            query['text'] = text
-        if elements:
-            query['elements'] = elements
+        sub_url = "/entities/dois"
+        query = {'query': {'entities': entities, 'text': text},
+                 'limit': top_k}
 
         return self._make_request(sub_url, payload=query, method=method)
 
@@ -157,13 +200,16 @@ class Rester(object):
         """
         Given input strings or lists of positive and negative words / phrases, returns a list of most similar words /
         phrases according to cosine similarity
-        :param positive: a string or a list of strings used as positive contributions to the cumulative embedding
-        :param negative: a string or a list of strings used as negative contributions to the cumulative embedding
-        :param ignore_missing: if True, ignore words missing from the embedding vocabulary, otherwise generate "guess"
-        embeddings
-        :param top_k: number of top results to return (10 by default)
-        :return: a dictionary with the following keys ["close_words", "scores", "positive", "negative",
+
+        Args:
+            positive: a string or a list of strings used as positive contributions to the cumulative embedding
+            negative: a string or a list of strings used as negative contributions to the cumulative embedding
+            ignore_missing: number of top results to return (10 by default)
+            top_k: a dictionary with the following keys ["close_words", "scores", "positive", "negative",
                                                                     "original_negative", "original_positive"]
+
+        Returns:
+            A list of similar words to the provided wordphrase expression.
         """
 
         if not isinstance(positive, list):
@@ -178,127 +224,113 @@ class Rester(object):
 
         return self._make_request(sub_url, payload=payload, method=method)
 
-    def get_embedding(self, wordphrases, ignore_missing=True):
+    def get_embedding(self, wordphrase, ignore_missing=True):
         """
-        Returns the embedding(s) for the supplied wordphrase. If the wordphrase is a string, returns a single embedding
-        vector as a list. If the wordphrase is a list of string, returns a matrix with each row corresponding to a single
-        (potentially cumulative) embedding. If the words (after pre-processing) do not have embeddings and
-        ignore_missing is set to True, a list of all 0s is returned
-        :param wordphrases: a string or a list of strings
-        :param ignore_missing: if True, will ignore missing words, otherwise will guess embeddings based on
-        string similarity
-        :return: a dictionary with following keys ["original_wordphrases", "processed_wordphrases", "embeddings"]
+        Returns the embedding(s) for the supplied wordphrase. If the wordphrase
+        is a string, returns a single embedding vector as a list. If the
+        wordphrase is a list of string, returns a matrix with each row
+        corresponding to a single (potentially cumulative) embedding. If the
+        words (after pre-processing) do not have embeddings and ignore_missing
+        is set to True, a list of all 0s is returned
+
+        Args:
+            wordphrase: a string or a list of strings
+
+            ignore_missing: if True, will ignore missing words,
+              otherwise will guess embeddings based on string similarity
+
+        Returns:
+
+            a dictionary with following keys ["original_wordphrases",
+              "processed_wordphrases", "embeddings"]
+
         """
 
-        if isinstance(wordphrases, list):
+        if isinstance(wordphrase, list):
             method = "POST"
             sub_url = '/embeddings'
             payload = {
-                'wordphrases': wordphrases,
+                'wordphrases': wordphrase,
                 'ignore_missing': ignore_missing
             }
         else:
             method = "GET"
-            sub_url = '/embeddings/{}'.format(wordphrases)
+            sub_url = '/embeddings/{}'.format(wordphrase)
             payload = {
                 'ignore_missing': ignore_missing
             }
-
-        return self._make_request(sub_url, payload=payload, method=method)
-
-    def materials_map(self, highlight, limit=None, ignore_missing=True, number_to_substring=False, dims=2):
-        """
-        Returns data for a plotly dash scatter plot, highlighted according to cosine similarity to highlight
-        :param highlight: a string or a list of strings according to which materials should be highlighted
-        :param limit: number of top materials (sorted by number of mentions) to show
-        :param ignore_missing: if True, will ignore missing words, otherwise will guess embeddings based on
-        string similarity
-        :param number_to_substring: if true, will convert numbers in chemical formula to substrings
-        :param dims: 2 or 3, determines if the map is 2D or 3D
-        :return: a dictionary with following keys: ["x", "y", "text", "marker"]
-        """
-
-        if highlight is not None and not isinstance(highlight, list):
-            highlight = [highlight]
-        method = "GET"
-        sub_url = '/materials_map'
-        payload = {'highlight': highlight,
-                   'limit': limit,
-                   'ignore_missing': ignore_missing,
-                   'number_to_substring': number_to_substring,
-                   'dims': dims}
 
         return self._make_request(sub_url, payload=payload, method=method)
 
     def get_journals(self):
         """
-        Get a list of all distinct journals in the db
+        Get a list of all distinct journals in the db.
 
-        :return: list; distinct journal names
+        Returns:
+            List of distinct journal names
         """
+
         method = "GET"
         sub_url = "/journals"
         return self._make_request(sub_url, method=method)
 
-    def get_journals_suggestion(self, query):
-        '''
-
-        :param query: string: a paragraph
-        :return: list: [['journal name', 'cosine similarity'], ...]
-        '''
-
-        method = 'POST'
-        sub_url = '/journal_suggestion'
-        payload = {'abstract': query}
-
-        return self._make_request(sub_url, payload=payload, method=method)
-
-    def get_similar_materials(self, material):
+    def get_ner_tags(self, document, concatenate=True, normalize=False):
         """
-        Finds the most similar compositions in the corpus.
+        Performs Named Entity Recognition on a document, labeling words that fall
+          into the 7 Matscholar entity types: material, property, application,
+          descriptor, structure/phase label, characterization method, and synthesis
+          method.
 
-        :param material: string; a chemical composition
-        :return: list; the most similar compositions
-        """
-        method = "GET"
-        sub_url = '/materials/similar/{}'.format(material)
-        return self._make_request(sub_url, method=method)
+        Args:
 
-    def get_ner_tags(self, docs, return_type="concatenated"):
-        """
-        Performs Named Entity Recognition.
+            document: str
 
-        :param docs: list; a list of documents; each document is represented as a single string
-        :param return_type: string; output format, can be "iob", "concatenated", or "normalized"
-        :return: list; tagged documents
+            concatenate: bool, set to True if you want concurrent entities
+              combined into a single token-entity.
+
+            normalize: bool, set to True if you want entites returned in their
+              normalized form (XRD = x-ray diffraction = xray diffraction)
+
+        Returns:
+            List of token-tag pairs.
+
         """
 
         method = "POST"
-        sub_url = "/ner"
+        sub_url = "/nlp/extract_entities"
         payload = {
-            "docs": docs,
-            "return_type": return_type
+            "document": document,
+            "concatenate": concatenate,
+            "normalize": normalize
         }
         return self._make_request(sub_url, payload=payload, method=method)
 
-    def get_db_count(self, count_type):
+    def get_db_stats(self):
         """
-        Get the count of various DB objects
-        :param count_type: string, one of ["abstracts", "entities", "materials"]. Object type to count
+         Get the statistics about the Matscholar db.
+
+        Returns:
+            dictionary of stats. e.g
+              {'abstract_count': 4941666,
+               'entities_count': 518026,
+               'materials_count': 290952}
+
         """
 
         method = "GET"
-        sub_url = "/count/" + count_type.strip()
+        sub_url = "/stats/"
 
         return self._make_request(sub_url, method=method)
 
     def classify_relevance(self, docs, decision_boundary=0.5):
         """
         Determine whether or not a document relates to inorganic material science.
+        Args:
+            docs: list of strings; the documents to be classified
+            decision_boundary: float; decision boundary for the classifier
 
-        :param docs: list of strings; the documents to be classified
-        :param decision_boundary: float; decision boundary for the classifier
-        :return: list; classification labels for each doc (1 or 0)
+        Returns:
+            list; classification labels for each doc (1 or 0)
         """
         method = "POST"
         sub_url = "/relevance"
