@@ -151,7 +151,8 @@ class Rester(object):
 
         method = "POST"
         sub_url = "/materials"
-        query = {'entities': entities, 'text': text}
+        query = {'query': {'entities': entities, 'text': text},
+                 'limit': top_k}
 
         return self._make_request(sub_url, payload=query, method=method)
 
