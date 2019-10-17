@@ -26,8 +26,7 @@ when working with materials scholar tools.
 
 
 ## Configuring Your API Key
-The Materials Scholar API can only be accessed by providing an API key in `x-api-key` request header field. 
-To receive an API key to access the Materials Scholar API, please contact John Dagdelen at jdagdelen@lbl.gov.
+The Materials Scholar API can only be accessed by providing an API key in `x-api-key` request header field. API keys are currently only available to internal collaborators at LBNL, but will be available soon. To request an API key to access the Materials Scholar API (or to request to be added to the waiting list), please contact John Dagdelen at jdagdelen@lbl.gov.
 
 ## API Usage
 
