@@ -1,4 +1,4 @@
-<img src="docs/logo.png" alt="matscholar logo" width="400px">
+<img src="docs/logo.png" alt="matscholar logo" width="800px">
 
 `matscholar` (Materials Scholar) is a Python library for materials-focused natural language 
 processing (NLP). It is maintained by a team of researchers at UC Berkeley and Lawrence Berkeley 
