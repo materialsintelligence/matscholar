@@ -273,6 +273,24 @@ class Rester(object):
         sub_url = "/stats/journals"
         return self._make_request(sub_url, method=method)
 
+    def get_journal_suggestion(self, abstract):
+        """
+        Gets a list of possible journals to submit a paper to based on NLP analysis
+          of a provided abstract.
+        Args:
+            abstract (str): Text of abstract
+
+        Returns:
+            (list) tuples of journal names and relative confidence
+
+        """
+        method = "POST"
+        sub_url = "/nlp/suggest_journal/"
+        payload = {
+            'abstract': abstract
+        }
+        return self._make_request(sub_url, payload=payload, method=method)
+
     def get_ner_tags(self, document, concatenate=True, normalize=False):
         """
         Performs Named Entity Recognition on a document, labeling words that fall
