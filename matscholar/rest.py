@@ -121,7 +121,7 @@ class Rester(object):
         """
 
         method = "POST"
-        sub_url = "/entries"
+        sub_url = "/entries/"
         query = {'query': {'entities': entities, 'text': text},
                  'limit': top_k}
 
@@ -159,7 +159,7 @@ class Rester(object):
     def entities_search(self, entities, text=None, elements=None, top_k=10):
 
         method = "POST"
-        sub_url = "/entities"
+        sub_url = "/entities/"
         query = {'query': {'entities': entities, 'text': text},
                  'limit': top_k}
 
