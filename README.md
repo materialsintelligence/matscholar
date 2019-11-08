@@ -11,6 +11,8 @@ discovery and design.
 Documentation for the API can be found in this readme, as well as in the jupyter notebook: docs/demo.ipynb. If
 the notebook fails to render on github, paste the link into nbviewer: https://nbviewer.jupyter.org.
 
+You can find our official support forum here, under the "Matscholar" category: https://dicuss.matsci.org
+
 ## Setup
 
 For installation and usage - it doesn't work with python3.7 as there are problems with dependencies, so use python3.6
