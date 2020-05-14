@@ -150,7 +150,7 @@ class Rester(object):
         """
 
         method = "POST"
-        sub_url = "/materials"
+        sub_url = "/materials/"
         query = {'query': {'entities': entities, 'text': text},
                  'limit': top_k}
 
