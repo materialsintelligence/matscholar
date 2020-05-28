@@ -89,7 +89,7 @@ class Rester(object):
 
     def __search(self, group_by, entities, text=None, elements=None, top_k=10):
         method = "POST"
-        sub_url = "/search"
+        sub_url = "/search/"
         query = {'entities': entities, 'group_by': group_by, 'limit': top_k}
         if text:
             query['text'] = text
@@ -314,7 +314,7 @@ class Rester(object):
         """
 
         method = "POST"
-        sub_url = "/nlp/extract_entities"
+        sub_url = "/nlp/extract_entities/"
         payload = {
             "document": document,
             "concatenate": concatenate,
