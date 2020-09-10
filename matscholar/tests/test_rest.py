@@ -1,7 +1,9 @@
-from matscholar import Rester
-import numpy.testing as npt
 import unittest
+
 import numpy as np
+import numpy.testing as npt
+
+from matscholar import Rester
 
 
 class EmbeddingEngineTest(unittest.TestCase):
@@ -9,40 +11,53 @@ class EmbeddingEngineTest(unittest.TestCase):
 
     def test_materials_search(self):
 
-        top_thermoelectrics = self.r.materials_search("thermoelectric", top_k=10)
+        top_thermoelectrics = self.r.materials_search("thermoelectric",
+                                                      top_k=10)
 
-        self.assertListEqual(top_thermoelectrics["counts"], [2452, 9, 2598, 13, 5, 9, 831, 167, 8, 390])
-        self.assertListEqual(top_thermoelectrics["materials"], ['Bi2Te3', 'MgAgSb', 'PbTe', 'PbSe0.5Te0.5',
-                                                                'In0.25Co3FeSb12', '(Bi0.15Sb0.85)2Te3', 'CoSb3',
-                                                                'Bi0.4Sb1.6Te3', 'CeFe3CoSb12', 'Bi0.5Sb1.5Te3'])
-        self.assertEqual(top_thermoelectrics["original_positive"], "thermoelectric")
+        self.assertListEqual(top_thermoelectrics["counts"],
+                             [2452, 9, 2598, 13, 5, 9, 831, 167, 8, 390])
+        self.assertListEqual(top_thermoelectrics["materials"],
+                             ['Bi2Te3', 'MgAgSb', 'PbTe', 'PbSe0.5Te0.5',
+                              'In0.25Co3FeSb12', '(Bi0.15Sb0.85)2Te3', 'CoSb3',
+                              'Bi0.4Sb1.6Te3', 'CeFe3CoSb12', 'Bi0.5Sb1.5Te3'])
+        self.assertEqual(top_thermoelectrics["original_positive"],
+                         "thermoelectric")
         self.assertEqual(top_thermoelectrics["original_negative"], "")
-        npt.assert_array_almost_equal(top_thermoelectrics["scores"], [0.19262796640396118, 0.13790667057037354,
-                                                                      0.12772011756896973, 0.1259261965751648,
-                                                                      0.12495005130767822, 0.12300053983926773,
-                                                                      0.12144004553556442, 0.11942288279533386,
-                                                                      0.11764131486415863, 0.11382885277271271])
-        self.assertListEqual(top_thermoelectrics["positive"], [['thermoelectric']])
+        npt.assert_array_almost_equal(top_thermoelectrics["scores"],
+                                      [0.19262796640396118, 0.13790667057037354,
+                                       0.12772011756896973, 0.1259261965751648,
+                                       0.12495005130767822, 0.12300053983926773,
+                                       0.12144004553556442, 0.11942288279533386,
+                                       0.11764131486415863,
+                                       0.11382885277271271])
+        self.assertListEqual(top_thermoelectrics["positive"],
+                             [['thermoelectric']])
 
     def test_close_words(self):
 
         # test data
-        positives = ["thermoelectric figure of merit", "Piezoelectric asdasdfasasd", "thermoelectric,Perovskite"]
+        positives = ["thermoelectric figure of merit",
+                     "Piezoelectric asdasdfasasd", "thermoelectric,Perovskite"]
         negatives = [None, "Perovskite", "anode,cathode"]
         top_ks = [10, 5, 5]
         ignore_missing = [False, True, True]
 
         # expected response
         close_words = [
-            ['ZT', 'figure_of_merit_ZT', 'thermoelectric_figure_of_merit_ZT', 'seebeck_coefficient', 'zT',
-             'thermoelectric_figure_-_of_-_merit', 'thermoelectric_power_factor', 'ZT_value', 'ZT_values',
+            ['ZT', 'figure_of_merit_ZT', 'thermoelectric_figure_of_merit_ZT',
+             'seebeck_coefficient', 'zT',
+             'thermoelectric_figure_-_of_-_merit',
+             'thermoelectric_power_factor', 'ZT_value', 'ZT_values',
              'dimensionless_figure_of_merit'],
-            ['d31', 'electromechanical', 'electromechanical_coupling', 'd33', 'pC'],
-            ['thermoelectric_properties', 'Cs2AgBiBr6', 'perovskites', 'tetradymite_-_like', 'ABX3']
+            ['d31', 'electromechanical', 'electromechanical_coupling', 'd33',
+             'pC'],
+            ['thermoelectric_properties', 'Cs2AgBiBr6', 'perovskites',
+             'tetradymite_-_like', 'ABX3']
 
         ]
         scores = [
-            [0.865725, 0.862376, 0.849371, 0.847059, 0.843266, 0.835109, 0.831514, 0.82924, 0.825901, 0.822744],
+            [0.865725, 0.862376, 0.849371, 0.847059, 0.843266, 0.835109,
+             0.831514, 0.82924, 0.825901, 0.822744],
             [0.465956, 0.463872, 0.458091, 0.457684, 0.436465],
             [0.356694, 0.335016, 0.329782, 0.319091, 0.314465]
         ]
@@ -67,7 +82,8 @@ class EmbeddingEngineTest(unittest.TestCase):
                 scores,
                 processed_positives,
                 processed_negatives):
-            zt_words = self.r.close_words(p, negative=n, ignore_missing=im, top_k=tk)
+            zt_words = self.r.close_words(p, negative=n, ignore_missing=im,
+                                          top_k=tk)
 
             self.assertEqual(zt_words["original_positive"], p)
             self.assertEqual(zt_words["original_negative"], n if n else "")
@@ -85,31 +101,38 @@ class EmbeddingEngineTest(unittest.TestCase):
             "asdfsdfgsregbndffff Thermoelectric",
             "asdfsdfgsregbndffff Thermoelectric",
             ["Thermoelectric", "Solar cells"],
-            ["Thermoelectric solar cells", "Superconducting Randomtextthatsnotthere", "Te3Bi2"],
-            ["Thermoelectric solar cells", "Superconducting Randomtextthatsnotthere", "Bi2Te3"],
+            ["Thermoelectric solar cells",
+             "Superconducting Randomtextthatsnotthere", "Te3Bi2"],
+            ["Thermoelectric solar cells",
+             "Superconducting Randomtextthatsnotthere", "Bi2Te3"],
             [],
             ["asdfsdfgsregbndffff", "Thermoelectric"],
             ["asdfsdfgsregbndffff"]
         ]
-        ignore_missing = [False, False, True, False, False, False, True, False, True, True]
+        ignore_missing = [False, False, True, False, False, False, True, False,
+                          True, True]
         processed_wordphrases = [
             [["thermoelectric"]],
             [["solar_cells"]],
             [["thermoelectric"]],
             [["asdfsdfgsregbndffff", "thermoelectric"]],
             [["thermoelectric"], ["solar_cells"]],
-            [["thermoelectric", "solar_cells"], ["superconducting", "randomtextthatsnotthere"], ["Bi2Te3"]],
-            [["thermoelectric", "solar_cells"], ["superconducting"], ["Bi2Te3"]],
+            [["thermoelectric", "solar_cells"],
+             ["superconducting", "randomtextthatsnotthere"], ["Bi2Te3"]],
+            [["thermoelectric", "solar_cells"], ["superconducting"],
+             ["Bi2Te3"]],
             [],
             [[], ["thermoelectric"]],
             [[]]
         ]
         embedding_shapes = [
-            (1, 200), (1, 200), (1, 200), (1, 200), (2, 200), (3, 200), (3, 200), (0, ), (2, 200), (1, 200)
+            (1, 200), (1, 200), (1, 200), (1, 200), (2, 200), (3, 200),
+            (3, 200), (0,), (2, 200), (1, 200)
         ]
 
         # valid request
-        for wps, pwps, es, im in zip(wordphrases, processed_wordphrases, embedding_shapes, ignore_missing):
+        for wps, pwps, es, im in zip(wordphrases, processed_wordphrases,
+                                     embedding_shapes, ignore_missing):
             response_dict = self.r.get_embedding(wps, ignore_missing=im)
 
             self.assertEqual(response_dict["original_wordphrases"], wps)
@@ -149,7 +172,8 @@ class EmbeddingEngineTest(unittest.TestCase):
                 zip(highlights, ignore_missing, limit, dims, first3materials,
                     first3scores, processed_highlights, coords, nr_mats):
 
-            response = self.r.materials_map(highlight=h, ignore_missing=im, limit=l, dims=d)
+            response = self.r.materials_map(highlight=h, ignore_missing=im,
+                                            limit=l, dims=d)
 
             self.assertEqual(response["original_highlight"], h)
             self.assertEqual(response["processed_highlight"], ph)
@@ -157,14 +181,15 @@ class EmbeddingEngineTest(unittest.TestCase):
             for xyz in c:
                 self.assertIn(xyz, response["plot_data"])
             self.assertListEqual(response["plot_data"]["text"][:3], f3m)
-            npt.assert_array_almost_equal(response["plot_data"]["marker"]["color"][:3], f3s)
+            npt.assert_array_almost_equal(
+                response["plot_data"]["marker"]["color"][:3], f3s)
 
             self.assertEqual(len(response["plot_data"]["text"]), nm)
             self.assertEqual(len(response["plot_data"]["x"]), nm)
             self.assertEqual(len(response["plot_data"]["y"]), nm)
-          
-class EntSearchTest(unittest.TestCase):
 
+
+class EntSearchTest(unittest.TestCase):
     rester = Rester()
     KEYS = ['doi', 'MAT', 'PRO', 'APL', 'SPL', 'DSC', 'SMT', 'CMT']
     test_query = {
@@ -173,7 +198,6 @@ class EntSearchTest(unittest.TestCase):
     }
 
     def test_ent_search(self):
-
         result = self.rester.search_ents(self.test_query)
         self.assertEqual(len(result), 1126)
         self.assertTrue(all(key in result[0].keys() for key in self.KEYS))
@@ -184,33 +208,38 @@ class EntSearchTest(unittest.TestCase):
         subkeys = [key for key in self.KEYS if key != 'doi']
         self.assertTrue(all(key in result for key in subkeys))
 
-class SimilarMaterialsTest(unittest.TestCase):
 
+class SimilarMaterialsTest(unittest.TestCase):
     rester = Rester()
 
     def test_similar_materials(self):
         material = 'LiCoO2'
         result = self.rester.get_similar_materials(material)
         self.assertEqual(len(result), 10)
-        similar_mats = ['CoLi2NiO4', 'Co3Li10Ni7O20', 'CoLi4Ni3O8', 'CoLi3MnO5', 'CoLi2O4Si',
-                        'FeLiO2', 'CoLi3MnNiO6', 'CoLi10Ni9O20', 'CoLiMnO4', 'Fe2Li3O4P']
+        similar_mats = ['CoLi2NiO4', 'Co3Li10Ni7O20', 'CoLi4Ni3O8', 'CoLi3MnO5',
+                        'CoLi2O4Si',
+                        'FeLiO2', 'CoLi3MnNiO6', 'CoLi10Ni9O20', 'CoLiMnO4',
+                        'Fe2Li3O4P']
         self.assertEqual(result, similar_mats)
 
-class NERTest(unittest.TestCase):
 
+class NERTest(unittest.TestCase):
     rester = Rester()
-    TEST_DOCS = ["We synthesized AO2 (A = Sr, Ba) thin films. The band gap was 2.5 eV.",
-            "The lattice constant of ZnO is 3.8 A. This was measured using XRD."]
+    TEST_DOCS = [
+        "We synthesized AO2 (A = Sr, Ba) thin films. The band gap was 2.5 eV.",
+        "The lattice constant of ZnO is 3.8 A. This was measured using XRD."]
 
     def test_iob(self):
-        tagged_docs = self.rester.get_ner_tags(self.TEST_DOCS, return_type="iob")
+        tagged_docs = self.rester.get_ner_tags(self.TEST_DOCS,
+                                               return_type="iob")
         print(tagged_docs)
         self.assertEqual(len(tagged_docs), 2)
         self.assertEqual(len(tagged_docs[0]), 2)
         self.assertEqual(tagged_docs[0][0][2][1], "B-MAT")
 
     def test_concatenated(self):
-        tagged_docs = self.rester.get_ner_tags(self.TEST_DOCS, return_type="concatenated")
+        tagged_docs = self.rester.get_ner_tags(self.TEST_DOCS,
+                                               return_type="concatenated")
         self.assertEqual(len(tagged_docs), 2)
         self.assertEqual(len(tagged_docs[0]), 2)
         self.assertEqual(tagged_docs[0][0][2][1], "MAT")
@@ -218,7 +247,8 @@ class NERTest(unittest.TestCase):
         self.assertFalse(any("-" in tag for token, tag in tagged_docs[0][0]))
 
     def test_normalized(self):
-        tagged_docs = self.rester.get_ner_tags(self.TEST_DOCS, return_type="normalized")
+        tagged_docs = self.rester.get_ner_tags(self.TEST_DOCS,
+                                               return_type="normalized")
         self.assertEqual(len(tagged_docs), 2)
         self.assertEqual(len(tagged_docs[0]), 2)
         self.assertEqual(tagged_docs[0][0][2][1], "MAT")
@@ -233,7 +263,6 @@ class NERTest(unittest.TestCase):
 
 
 class MaterialSearchEntsTest(unittest.TestCase):
-
     rester = Rester()
     TEST_QUERY = {
         "entities": ["ferroelectric"],
@@ -246,7 +275,3 @@ class MaterialSearchEntsTest(unittest.TestCase):
         self.assertEqual(result[0][0], "BaO3Ti")
         self.assertTrue(not any("Pb" in mat for mat, _, _ in result))
         self.assertTrue(all("O" in mat for mat, _, _ in result))
-
-
-
-

@@ -12,7 +12,7 @@ contacting John Dagdelen at jdagdelen@berkeley.edu.
 """
 
 __author__ = "John Dagdelen"
-__credits__ = "Leigh Weston, Amalie Trewartha, Vahe Tshitoyan"
+__credits__ = "Leigh Weston, Amalie Trewartha, Vahe Tshitoyan, Alex Dunn"
 __copyright__ = "Copyright 2018, Materials Intelligence"
 __version__ = "0.1"
 __maintainer__ = "John Dagdelen"
