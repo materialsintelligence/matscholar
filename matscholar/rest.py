@@ -46,8 +46,20 @@ class Rester(object):
     """
 
     def __init__(self, api_key=None, endpoint=None):
-        self.api_key = api_key if api_key else environ['MATERIALS_SCHOLAR_API_KEY']
-        self.preamble = endpoint if endpoint else environ['MATERIALS_SCHOLAR_ENDPOINT']
+        self.api_key = api_key if api_key else environ.get('MATERIALS_SCHOLAR_API_KEY', None)
+        if not self.api_key:
+            raise MatScholarRestError(
+                "Please specify an API key or request one through the "
+                "Matscholar team."
+            )
+
+        if endpoint:
+            self.preamble = endpoint
+        else:
+            self.preamble = environ.get('MATERIALS_SCHOLAR_ENDPOINT', None)
+            if not self.preamble:
+                self.preamble = "https://api.matscholar.com"
+
         self.session = requests.Session()
         self.session.headers = {"x-api-key": self.api_key}
 
@@ -127,139 +139,196 @@ class Rester(object):
 
         return self._make_request(sub_url, payload=query, method=method)
 
-    def materials_search(self, entities, text=None, elements=None, top_k=10):
-        """
-        Search for materials
+    # todo: NOT SUPPORTED
+    # def materials_search(self, entities, text=None, elements=None, top_k=10):
+    #     """
+    #     Search for materials
+    #
+    #     Args:
+    #
+    #         entities: dict of entity lists (list of str) to filter by. Keys are
+    #           singular snake case for each of the entity types (material,
+    #           property, descriptor, application, synthesis_method,
+    #           structure_phase_label, characterization_method)
+    #
+    #         text: english text, which gets searched on via Elasticsearch.
+    #
+    #         elements: string or list of strings; filter by elements in materials
+    #
+    #         top_k: (int or None) if int, specifies the number of matches to
+    #             return; if None, returns all matches.
+    #
+    #     Returns:
+    #         List of entries (dictionaries) with abstracts, entities, and metadata.
+    #     """
+    #
+    #     method = "POST"
+    #     sub_url = "/materials"
+    #     query = {'query': {'entities': entities, 'text': text},
+    #              'limit': top_k}
+    #
+    #     return self._make_request(sub_url, payload=query, method=method)
 
-        Args:
+    # todo: NOT SUPPORTED
+    # def entities_search(self, entities, text=None, elements=None, top_k=10):
+    #
+    #     method = "POST"
+    #     sub_url = "/entities/"
+    #     query = {'query': {'entities': entities, 'text': text},
+    #              'limit': top_k}
+    #
+    #     return self._make_request(sub_url, payload=query, method=method)
 
-            entities: dict of entity lists (list of str) to filter by. Keys are
-              singular snake case for each of the entity types (material,
-              property, descriptor, application, synthesis_method,
-              structure_phase_label, characterization_method)
+    # todo: NOT SUPPORTED
+    # def dois_search(self, entities, text=None, elements=None, top_k=None):
+    #     """
+    #     Search for dois
+    #
+    #     Args:
+    #
+    #         entities: dict of entity lists (list of str) to filter by. Keys are
+    #           singular snake case for each of the entity types (material,
+    #           property, descriptor, application, synthesis_method,
+    #           structure_phase_label, characterization_method)
+    #
+    #         text: english text, which gets searched on via Elasticsearch.
+    #
+    #         elements: string or list of strings; filter by elements in materials
+    #
+    #         top_k: (int or None) if int, specifies the number of matches to
+    #             return; if None, returns all matches.
+    #
+    #     Returns:
+    #         List of of dois matching criteria.
+    #
+    #     """
+    #
+    #     method = "POST"
+    #     sub_url = "/entities/dois"
+    #     query = {'query': {'entities': entities, 'text': text},
+    #              'limit': top_k}
+    #
+    #     return self._make_request(sub_url, payload=query, method=method)
 
-            text: english text, which gets searched on via Elasticsearch.
+    # todo: NOT SUPPORTED
+    # def close_words(self, positive, negative=None, ignore_missing=True, top_k=10):
+    #     """
+    #     Given input strings or lists of positive and negative words / phrases, returns a list of most similar words /
+    #     phrases according to cosine similarity
+    #
+    #     Args:
+    #         positive: a string or a list of strings used as positive contributions to the cumulative embedding
+    #         negative: a string or a list of strings used as negative contributions to the cumulative embedding
+    #         ignore_missing: number of top results to return (10 by default)
+    #         top_k: a dictionary with the following keys ["close_words", "scores", "positive", "negative",
+    #                                                                 "original_negative", "original_positive"]
+    #
+    #     Returns:
+    #         A list of similar words to the provided wordphrase expression.
+    #     """
+    #
+    #     if not isinstance(positive, list):
+    #         positive = [positive]
+    #     if negative and not isinstance(negative, list):
+    #         negative = [negative]
+    #
+    #     method = "GET"
+    #     sub_url = '/embeddings/close_words/{}'.format(",".join(positive))
+    #     payload = {'top_k': top_k, 'negative': ",".join(
+    #         negative) if negative else None, 'ignore_missing': ignore_missing}
+    #
+    #     return self._make_request(sub_url, payload=payload, method=method)
 
-            elements: string or list of strings; filter by elements in materials
+    # todo: NOT SUPPORTED
+    # def get_embedding(self, wordphrase, ignore_missing=True):
+    #     """
+    #     Returns the embedding(s) for the supplied wordphrase. If the wordphrase
+    #     is a string, returns a single embedding vector as a list. If the
+    #     wordphrase is a list of string, returns a matrix with each row
+    #     corresponding to a single (potentially cumulative) embedding. If the
+    #     words (after pre-processing) do not have embeddings and ignore_missing
+    #     is set to True, a list of all 0s is returned
+    #
+    #     Args:
+    #         wordphrase: a string or a list of strings
+    #
+    #         ignore_missing: if True, will ignore missing words,
+    #           otherwise will guess embeddings based on string similarity
+    #
+    #     Returns:
+    #
+    #         a dictionary with following keys ["original_wordphrases",
+    #           "processed_wordphrases", "embeddings"]
+    #
+    #     """
+    #
+    #     if isinstance(wordphrase, list):
+    #         method = "POST"
+    #         sub_url = '/embeddings'
+    #         payload = {
+    #             'wordphrases': wordphrase,
+    #             'ignore_missing': ignore_missing
+    #         }
+    #     else:
+    #         method = "GET"
+    #         sub_url = '/embeddings/{}'.format(wordphrase)
+    #         payload = {
+    #             'ignore_missing': ignore_missing
+    #         }
+    #
+    #     return self._make_request(sub_url, payload=payload, method=method)
 
-            top_k: (int or None) if int, specifies the number of matches to
-                return; if None, returns all matches.
+    # todo: NOT SUPPORTED
+    # def get_ner_tags(self, document, concatenate=True, normalize=False):
+    #     """
+    #     Performs Named Entity Recognition on a document, labeling words that fall
+    #       into the 7 Matscholar entity types: material, property, application,
+    #       descriptor, structure/phase label, characterization method, and synthesis
+    #       method.
+    #
+    #     Args:
+    #
+    #         document: str
+    #
+    #         concatenate: bool, set to True if you want concurrent entities
+    #           combined into a single token-entity.
+    #
+    #         normalize: bool, set to True if you want entites returned in their
+    #           normalized form (XRD = x-ray diffraction = xray diffraction)
+    #
+    #     Returns:
+    #         List of token-tag pairs.
+    #
+    #     """
+    #
+    #     method = "POST"
+    #     sub_url = "/nlp/extract_entities"
+    #     payload = {
+    #         "document": document,
+    #         "concatenate": concatenate,
+    #         "normalize": normalize
+    #     }
+    #     return self._make_request(sub_url, payload=payload, method=method)
 
-        Returns:
-            List of entries (dictionaries) with abstracts, entities, and metadata.
-        """
-
-        method = "POST"
-        sub_url = "/materials"
-        query = {'query': {'entities': entities, 'text': text},
-                 'limit': top_k}
-
-        return self._make_request(sub_url, payload=query, method=method)
-
-    def entities_search(self, entities, text=None, elements=None, top_k=10):
-
-        method = "POST"
-        sub_url = "/entities/"
-        query = {'query': {'entities': entities, 'text': text},
-                 'limit': top_k}
-
-        return self._make_request(sub_url, payload=query, method=method)
-
-    def dois_search(self, entities, text=None, elements=None, top_k=None):
-        """
-        Search for dois
-
-        Args:
-
-            entities: dict of entity lists (list of str) to filter by. Keys are
-              singular snake case for each of the entity types (material,
-              property, descriptor, application, synthesis_method,
-              structure_phase_label, characterization_method)
-
-            text: english text, which gets searched on via Elasticsearch.
-
-            elements: string or list of strings; filter by elements in materials
-
-            top_k: (int or None) if int, specifies the number of matches to
-                return; if None, returns all matches.
-
-        Returns:
-            List of of dois matching criteria.
-
-        """
-
-        method = "POST"
-        sub_url = "/entities/dois"
-        query = {'query': {'entities': entities, 'text': text},
-                 'limit': top_k}
-
-        return self._make_request(sub_url, payload=query, method=method)
-
-    def close_words(self, positive, negative=None, ignore_missing=True, top_k=10):
-        """
-        Given input strings or lists of positive and negative words / phrases, returns a list of most similar words /
-        phrases according to cosine similarity
-
-        Args:
-            positive: a string or a list of strings used as positive contributions to the cumulative embedding
-            negative: a string or a list of strings used as negative contributions to the cumulative embedding
-            ignore_missing: number of top results to return (10 by default)
-            top_k: a dictionary with the following keys ["close_words", "scores", "positive", "negative",
-                                                                    "original_negative", "original_positive"]
-
-        Returns:
-            A list of similar words to the provided wordphrase expression.
-        """
-
-        if not isinstance(positive, list):
-            positive = [positive]
-        if negative and not isinstance(negative, list):
-            negative = [negative]
-
-        method = "GET"
-        sub_url = '/embeddings/close_words/{}'.format(",".join(positive))
-        payload = {'top_k': top_k, 'negative': ",".join(
-            negative) if negative else None, 'ignore_missing': ignore_missing}
-
-        return self._make_request(sub_url, payload=payload, method=method)
-
-    def get_embedding(self, wordphrase, ignore_missing=True):
-        """
-        Returns the embedding(s) for the supplied wordphrase. If the wordphrase
-        is a string, returns a single embedding vector as a list. If the
-        wordphrase is a list of string, returns a matrix with each row
-        corresponding to a single (potentially cumulative) embedding. If the
-        words (after pre-processing) do not have embeddings and ignore_missing
-        is set to True, a list of all 0s is returned
-
-        Args:
-            wordphrase: a string or a list of strings
-
-            ignore_missing: if True, will ignore missing words,
-              otherwise will guess embeddings based on string similarity
-
-        Returns:
-
-            a dictionary with following keys ["original_wordphrases",
-              "processed_wordphrases", "embeddings"]
-
-        """
-
-        if isinstance(wordphrase, list):
-            method = "POST"
-            sub_url = '/embeddings'
-            payload = {
-                'wordphrases': wordphrase,
-                'ignore_missing': ignore_missing
-            }
-        else:
-            method = "GET"
-            sub_url = '/embeddings/{}'.format(wordphrase)
-            payload = {
-                'ignore_missing': ignore_missing
-            }
-
-        return self._make_request(sub_url, payload=payload, method=method)
+    # todo: NOT SUPPORTED
+    # def classify_relevance(self, docs, decision_boundary=0.5):
+    #     """
+    #     Determine whether or not a document relates to inorganic material science.
+    #     Args:
+    #         docs: list of strings; the documents to be classified
+    #         decision_boundary: float; decision boundary for the classifier
+    #
+    #     Returns:
+    #         list; classification labels for each doc (1 or 0)
+    #     """
+    #     method = "POST"
+    #     sub_url = "/relevance"
+    #     payload = {
+    #         "docs": docs,
+    #         "decision_boundary": decision_boundary
+    #     }
+    #
+    #     return self._make_request(sub_url, payload=payload, method=method)
 
     def get_journals(self):
         """
@@ -291,37 +360,6 @@ class Rester(object):
         }
         return self._make_request(sub_url, payload=payload, method=method)
 
-    def get_ner_tags(self, document, concatenate=True, normalize=False):
-        """
-        Performs Named Entity Recognition on a document, labeling words that fall
-          into the 7 Matscholar entity types: material, property, application,
-          descriptor, structure/phase label, characterization method, and synthesis
-          method.
-
-        Args:
-
-            document: str
-
-            concatenate: bool, set to True if you want concurrent entities
-              combined into a single token-entity.
-
-            normalize: bool, set to True if you want entites returned in their
-              normalized form (XRD = x-ray diffraction = xray diffraction)
-
-        Returns:
-            List of token-tag pairs.
-
-        """
-
-        method = "POST"
-        sub_url = "/nlp/extract_entities"
-        payload = {
-            "document": document,
-            "concatenate": concatenate,
-            "normalize": normalize
-        }
-        return self._make_request(sub_url, payload=payload, method=method)
-
     def get_db_stats(self):
         """
          Get the statistics about the Matscholar db.
@@ -338,25 +376,6 @@ class Rester(object):
         sub_url = "/stats/"
 
         return self._make_request(sub_url, method=method)
-
-    def classify_relevance(self, docs, decision_boundary=0.5):
-        """
-        Determine whether or not a document relates to inorganic material science.
-        Args:
-            docs: list of strings; the documents to be classified
-            decision_boundary: float; decision boundary for the classifier
-
-        Returns:
-            list; classification labels for each doc (1 or 0)
-        """
-        method = "POST"
-        sub_url = "/relevance"
-        payload = {
-            "docs": docs,
-            "decision_boundary": decision_boundary
-        }
-
-        return self._make_request(sub_url, payload=payload, method=method)
 
 
 class MatScholarRestError(Exception):
