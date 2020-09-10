@@ -66,9 +66,9 @@ example_text = "solid oxide fuel cells"
 
 # entity filters: include documents mentioning BaZrO3 and nanoparticles; 
 # exclude documents mentioning thin films
-example_entities = {"material": ["BaZrO3"], "descriptor": ["nanoparticle", "-thin film"]}
+example_entities = {"descriptor": ["nanoparticle", "-thin film"]}
 
-docs = rester.search_text_with_ents(text=example_text, filters=example_entities)
+docs = rester.abstracts_search(example_entities, text=example_text)
 ```
 
 This will return a list of dictionaries containing the raw-text for each abstracts along with 
@@ -85,7 +85,7 @@ search_ents method. This method takes as input a dictionary with entity types as
 "GaN":
 
 ```python
-docs = rester.search_ents(query={"material": ["GaN"]})
+docs = rester.entities_search({"material": ["GaN"]})
 ```
 
 This wil return a list of dictionaries representing documents matching the query; each dict will contain 
@@ -99,42 +99,6 @@ summary = rester.get_summary(query={"material": ["GaN"]})
 ```
  This will return a dictionary with entity types as keys; the values will be a list of the top entities
  that occur in documents matching the query, each item in the list will be [entity, document count, fraction].
- 
-To perform a fast literature review, the materials_search_ents method may be used. For a chosen application, 
-this will return a list of all materials that co-occur with that application in our corpus. For example,
-to see which materials co-occur with the word thermoelectric in a document,
-
-```python
-mat_list = rester.materials_search_ents(["thermoelectric"], elements=["-Pb"], cutoff=None)
-```
-
-The above search will find all materials co-occurring with thermoelectric that do not contain lead. 
-The result will be a list, with each element containing a list of [material, co-occurence counts, co-occurrence dois].
- 
-**Word embeddings**
-
-Materials science word embeddings trained using word2vec; details on how the embeddings were trained,
-and their application in materials science discovery can be found in Ref. [2].
-
-To get the word embedding for a given word,
-```python
-embedding = rester.get_embedding("photovoltaics")
-```
-
-This will return a dict containing the embedding. The word embedding will be a 200-dimensional array.
-
-The rester also has a close_words method (based on cosine similarity of embeddings) which can be used to 
-explore the semantic similarity of materials science terms; this approach can be used discover materials
-for a new application (as outlined in the reference above), 
-
-To find words with a similar embedding to photovolatic:
-
-```python
-close_words = rester.close_words("photovoltaics", top_k=1000)
-```
-
-This will return the 1000 closest words to photovoltaics. The result will be a dictionary containing 
-the close words and their cosine similarity to the input word. 
 
 **Named Entity Recognition**
 
