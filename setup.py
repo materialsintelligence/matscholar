@@ -18,14 +18,13 @@ with open('LICENSE') as f:
 
 setup(
     name='matscholar',
-    version='0.0.2',
+    version='0.0.3',
     description='matscholar: a Python library for interacting with the Materials Scholar database.',
     long_description=readme,
     author='Materials Scholar Development Team',
-    author_email='jdagdelen@lbl.gov, vahe@tshitoyan.com, lweston@lbl.gov',
+    author_email='jdagdelen@lbl.gov, vahe@tshitoyan.com, lweston@lbl.gov, ardunn@lbl.gov',
     url='https://github.com/materialsintelligence/matscholar',
     license=license,
     packages=find_packages(),
-    entry_points={
-          'console_scripts': ['mscli = matscholar.cli.mscli:main',]}
+    install_requires=["numpy", "requests"]
 )
