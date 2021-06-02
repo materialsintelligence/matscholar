@@ -4,6 +4,9 @@
 processing (NLP). It is maintained by a team of researchers at UC Berkeley and Lawrence Berkeley 
 National Laboratory as part of a project funded by the Toyota Research Institute.
 
+
+The Matscholar API is under a major redesign and is currently not available. If you wish to use our NER models for named entity recognition (now housed in the [LBNLP repo](https://github.com/lbnlp/lbnlp)), you can run them locally by following the [instructions here](https://lbnlp.github.io/lbnlp/pretrained/). 
+
 This library provides a Python interface for interacting with the Materials Scholar API, performing
 basic NLP tasks on scientific text, and example notebooks on using these tools for materials 
 discovery and design.
